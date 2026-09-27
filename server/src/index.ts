@@ -10,6 +10,8 @@ import { errorHandler } from './middleware/errorHandler';
 import { SheetsSyncWorker } from './sheets/sheetsSyncWorker';
 import { SheetsInboundSync } from './sheets/sheetsInboundSync';
 
+import { prisma } from './prisma/client';
+
 export const app = express();
 
 // Security and Logging Middlewares
@@ -25,15 +27,27 @@ app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health Check Endpoint
-app.get('/health', (req, res) => {
+// Health Check Endpoints (/health & /api/health)
+const handleHealthCheck = async (_req: express.Request, res: express.Response) => {
+  let dbStatus = 'connected';
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch (err: any) {
+    dbStatus = `disconnected (${err.message || 'error'})`;
+  }
+
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    database: dbStatus,
     service: 'TPC Branch Head & Super Admin API',
     inboundSync: SheetsInboundSync.getStatus(),
   });
-});
+};
+
+app.get('/health', handleHealthCheck);
+app.get('/api/health', handleHealthCheck);
 
 // API Routes
 app.use('/api', routes);

@@ -15,6 +15,17 @@ const router = Router();
 router.use(apiRateLimiter);
 
 // ------------------------------------------
+// HEALTH CHECK ROUTE
+// ------------------------------------------
+router.get('/health', (_req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    service: 'TPC Branch Head & Super Admin API',
+  });
+});
+
+// ------------------------------------------
 // AUTHENTICATION ROUTES
 // ------------------------------------------
 router.post('/auth/admin/login', authRateLimiter, AuthController.login);
