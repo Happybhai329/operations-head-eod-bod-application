@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Department {
+  id               String        @id @default(uuid())
+  departmentId     String        @unique
+  departmentName   String        @unique
+  headId           String?
+  headName         String?
+  parentDepartment String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  employees        Employee[]
+  dailyReports     DailyReport[]
+  headRatings      HeadRating[]
+
+  @@map("departments")
+}
+
+model Employee {
+  id             String        @id @default(uuid())
+  employeeId     String        @unique
+  name           String
+  department     String
+  subDepartment  String?
+  status         String        @default("active") // "active", "inactive"
+  role           String        @default("employee")
+  contact        String?
+  joiningDate    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  departmentRel  Department?   @relation(fields: [department], references: [departmentName], onDelete: SetNull)
+  dailyReports   DailyReport[]
+
+  @@map("employees")
+}
+
+model DailyReport {
+  id                  String      @id @default(uuid())
+  reportDate          String      // Format: DD/MM/YYYY
+  dateTimestamp       BigInt      // Epoch ms for fast date-range queries
+  employeeId          String
+  departmentName      String
+  bodData             Json?       @default("{}")
+  eodData             Json?       @default("{}")
+  systemScore         Float?
+  headRating          String?     // e.g. "100", "90", "Auto"
+  finalScore          Float?
+  lastUpdated         DateTime    @default(now())
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  // Snake_case column mappings for full parity with employee app & PostgreSQL schema
+  date                String?     @map("date")
+  employee_id         String?     @map("employee_id")
+  department          String?     @map("department")
+  bod_data            String?     @map("bod_data")
+  eod_data            String?     @map("eod_data")
+  system_score        Float?      @map("system_score")
+  head_rating         Float?      @map("head_rating")
+  final_score         Float?      @map("final_score")
+  last_updated        String?     @map("last_updated")
+  approval_status     String?     @map("approval_status")
+  approval_timestamp  String?     @map("approval_timestamp")
+  expiry_timestamp    String?     @map("expiry_timestamp")
+
+  employee            Employee    @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+  departmentRel       Department? @relation(fields: [departmentName], references: [departmentName], onDelete: SetNull)
+
+  @@unique([employeeId, reportDate])
+  @@index([departmentName, reportDate])
+  @@index([dateTimestamp])
+  @@index([reportDate])
+  @@map("daily_reports")
+}
+
+model HeadRating {
+  id             String      @id @default(uuid())
+  ratingDate     String      // Format: DD/MM/YYYY
+  dateTimestamp  BigInt      // Epoch ms
+  departmentName String
+  headId         String?
+  baseScore      Float       @default(0)
+  adminRating    Float       @default(100) // Multiplier %: e.g. 100, 110, 85
+  finalHeadScore Float       @default(0)
+  updatedAt      DateTime    @updatedAt
+  createdAt      DateTime    @default(now())
+
+  departmentRel  Department? @relation(fields: [departmentName], references: [departmentName], onDelete: Cascade)
+
+  @@unique([departmentName, ratingDate])
+  @@index([ratingDate])
+  @@index([departmentName])
+  @@map("head_ratings")
+}
+
+model SyncJob {
+  id            String    @id @default(uuid())
+  entityType    String    // "HEAD_RATING", "DAILY_REPORT", "EMPLOYEE", "DEPARTMENT"
+  entityId      String    // Identifier of entity
+  operation     String    // "UPSERT", "INSERT", "UPDATE", "DELETE"
+  payload       Json
+  status        String    @default("PENDING") // "PENDING", "PROCESSING", "COMPLETED", "FAILED"
+  attempts      Int       @default(0)
+  maxAttempts   Int       @default(5)
+  lastAttemptAt DateTime?
+  nextAttemptAt DateTime?
+  error         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status, nextAttemptAt])
+  @@index([entityType, entityId])
+  @@map("sync_jobs")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actor     String   @default("SUPER_ADMIN")
+  action    String   // "LOGIN", "RATE_HEAD", "UPDATE_RATING", "SYNC_SHEETS", "MIGRATION"
+  entity    String   // "Department", "HeadRating", "DailyReport", etc.
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("SUPER_ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+model TaskMain {
+  taskId        String    @id @map("task_id")
+  taskName      String    @map("task_name")
+  instructions  String?   @default("") @map("instructions")
+  assignToId    String    @map("assign_to_id")
+  assignToName  String    @map("assign_to_name")
+  department    String    @map("department")
+  assignedBy    String    @default("Branch Head") @map("assigned_by")
+  priority      String    @default("Medium") @map("priority")
+  deadline      String?   @map("deadline")
+  status        String    @default("Open") @map("status") // "Open", "In Progress", "Overdue", "Completed", "Cancelled"
+  progress      Int       @default(0) @map("progress")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  completedAt   DateTime? @map("completed_at")
+  rating        Int?      @map("rating")
+  ratingRemark  String?   @map("rating_remark")
+  mode          String    @default("Checklist") @map("mode") // "Checklist", "Open"
+  lastUpdated   DateTime  @default(now()) @map("last_updated")
+
+  subTasks        TaskSub[]
+  checklistItems  TaskChecklist[]
+  attachments     TaskAttachment[]
+  remarks         TaskRemark[]
+
+  @@map("tasks_main")
+}
+
+model TaskSub {
+  subTaskId   String   @id @map("sub_task_id")
+  taskId      String   @map("task_id")
+  subTaskName String   @map("sub_task_name")
+  orderNo     Int      @default(1) @map("order_no")
+  status      String   @default("Open") @map("status")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  task        TaskMain @relation(fields: [taskId], references: [taskId], onDelete: Cascade)
+  items       TaskChecklist[]
+
+  @@map("tasks_sub")
+}
+
+model TaskChecklist {
+  itemId      String    @id @map("item_id")
+  taskId      String    @map("task_id")
+  subTaskId   String?   @map("sub_task_id")
+  itemText    String    @map("item_text")
+  isDone      Boolean   @default(false) @map("is_done")
+  doneAt      DateTime? @map("done_at")
+  doneBy      String?   @map("done_by")
+
+  task        TaskMain  @relation(fields: [taskId], references: [taskId], onDelete: Cascade)
+  subTask     TaskSub?  @relation(fields: [subTaskId], references: [subTaskId], onDelete: Cascade)
+
+  @@map("tasks_checklist")
+}
+
+model TaskAttachment {
+  attachId  String   @id @map("attach_id")
+  taskId    String   @map("task_id")
+  fileName  String   @map("file_name")
+  url       String   @map("url")
+  type      String   @default("file") @map("type")
+  addedAt   DateTime @default(now()) @map("added_at")
+
+  task      TaskMain @relation(fields: [taskId], references: [taskId], onDelete: Cascade)
+
+  @@map("tasks_attachments")
+}
+
+model TaskRemark {
+  remarkId  String   @id @map("remark_id")
+  taskId    String   @map("task_id")
+  remark    String   @map("remark")
+  addedBy   String   @default("Branch Head") @map("added_by")
+  addedAt   DateTime @default(now()) @map("added_at")
+
+  task      TaskMain @relation(fields: [taskId], references: [taskId], onDelete: Cascade)
+
+  @@map("tasks_remarks")
+}
+

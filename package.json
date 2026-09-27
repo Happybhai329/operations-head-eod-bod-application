@@ -1,0 +1,86 @@
+{
+  "name": "tpc-branch-head-fullstack",
+  "version": "1.0.10",
+  "description": "The Prime Classes - Branch Head & Super Admin Full-Stack Platform",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm run build",
+    "build": "npm run build:server && npm run build:client",
+    "start": "cd server && npm start",
+    "render-build": "npm install && cd server && npm install && npx prisma generate && npm run build && cd ../client && npm install && npm run build",
+    "render-start": "cd server && node dist/index.js",
+    "prisma:generate": "cd server && npx prisma generate",
+    "prisma:migrate": "cd server && npx prisma migrate dev",
+    "prisma:push": "cd server && npx prisma db push",
+    "prisma:studio": "cd server && npx prisma studio",
+    "seed": "cd server && npm run seed",
+    "migrate:sheets": "cd server && npm run migrate:sheets",
+    "sync:google-sheets": "cd server && npm run sync:google-sheets",
+    "test": "cd server && npm test",
+    "electron": "electron .",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:portable": "npm run build && electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.theprimeclasses.branchhead",
+    "productName": "The Prime Classes - Branch Head",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "server/dist/**/*",
+      "server/node_modules/**/*",
+      "server/prisma/**/*",
+      "server/.env",
+      "client/dist/**/*"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "server/node_modules/**/*",
+      "**/@prisma/**",
+      "**/.prisma/**",
+      "**/node_modules/.prisma/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "The Prime Classes - Branch Head"
+    }
+  },
+  "keywords": [
+    "the-prime-classes",
+    "branch-head",
+    "super-admin",
+    "postgresql",
+    "prisma",
+    "react",
+    "express",
+    "electron"
+  ],
+  "author": "The Prime Classes Development Team",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^43.4.1",
+    "electron-builder": "^26.15.3",
+    "wait-on": "^9.1.0"
+  }
+}

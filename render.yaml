@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: operations-head-eod-bod
+    env: node
+    plan: free
+    buildCommand: npm run render-build
+    startCommand: npm run render-start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: SUPER_ADMIN_CODE
+        value: TPC-SUPER-2026
+      - key: SUPER_ADMIN_USERNAME
+        value: superadmin
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: MASTER_DB_SPREADSHEET_ID
+        value: 1AxdiOpaij8Lnx0TV5iMhgVlADfN0LeXzwOdmbzmrlGA
+      - key: APP_DB_SPREADSHEET_ID
+        value: 1IFGc0kvv9LpbZUfEGroY8PevevJ8axdPApVrLjidlw8
+      - key: GOOGLE_CREDENTIALS_JSON
+        sync: false
+      - key: SYNC_WORKER_ENABLED
+        value: "true"
+      - key: SYNC_POLL_INTERVAL_MS
+        value: "5000"
+      - key: SYNC_MAX_RETRIES
+        value: "5"
+      - key: SYNC_LOOKBACK_DAYS
+        value: "35"
+      - key: INBOUND_SYNC_INTERVAL_MS
+        value: "30000"

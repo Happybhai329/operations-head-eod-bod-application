@@ -1,0 +1,45 @@
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build & Release outputs
+dist/
+build/
+release/
+.next/
+out/
+
+# Environment files
+.env
+.env.*
+*.env
+*.env.*
+
+# Prisma generated & SQLite local fallbacks
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Google credentials & service account private keys
+*credentials*.json
+*service-account*.json
+*.pem
+*.key
+
+# Logs
+logs/
+*.log
+app_stderr.log
+app_stdout.log
+
+# OS & IDE & Temp
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-workspace
+~$*
+
