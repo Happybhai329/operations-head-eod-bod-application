@@ -13,6 +13,7 @@ import { SheetsInboundSync } from './sheets/sheetsInboundSync';
 import { prisma } from './prisma/client';
 
 export const app = express();
+app.set('trust proxy', 1);
 
 // Security and Logging Middlewares
 app.use(helmet({
@@ -31,9 +32,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 const handleHealthCheck = async (_req: express.Request, res: express.Response) => {
   let dbStatus = 'connected';
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    const pingPromise = prisma.$queryRaw`SELECT 1`;
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500));
+    await Promise.race([pingPromise, timeoutPromise]);
   } catch (err: any) {
-    dbStatus = `disconnected (${err.message || 'error'})`;
+    dbStatus = `busy (${err.message || 'error'})`;
   }
 
   res.status(200).json({

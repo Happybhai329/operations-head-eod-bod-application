@@ -134,7 +134,7 @@ export class SheetsInboundSync {
 
       let count = 0;
       const validDeptRows = rows.slice(1).filter((r: any) => nameIdx !== -1 && r[nameIdx]);
-      const deptBatchSize = 10;
+      const deptBatchSize = 5;
       for (let i = 0; i < validDeptRows.length; i += deptBatchSize) {
         const chunk = validDeptRows.slice(i, i + deptBatchSize);
         await Promise.all(chunk.map(async (row: any) => {
@@ -179,7 +179,7 @@ export class SheetsInboundSync {
 
       let count = 0;
       const validEmpRows = rows.slice(1).filter((r: any) => empIdIdx !== -1 && r[empIdIdx] && nameIdx !== -1 && r[nameIdx]);
-      const empBatchSize = 15;
+      const empBatchSize = 5;
       for (let i = 0; i < validEmpRows.length; i += empBatchSize) {
         const chunk = validEmpRows.slice(i, i + empBatchSize);
         await Promise.all(chunk.map(async (row: any) => {
@@ -355,7 +355,7 @@ export class SheetsInboundSync {
       }
 
       let count = 0;
-      const reportBatchSize = 15;
+      const reportBatchSize = 5;
       for (let i = 0; i < validRecords.length; i += reportBatchSize) {
         const chunk = validRecords.slice(i, i + reportBatchSize);
         await Promise.all(chunk.map(async (rec) => {
@@ -463,7 +463,7 @@ export class SheetsInboundSync {
       }
 
       let count = 0;
-      const ratingBatchSize = 15;
+      const ratingBatchSize = 5;
       for (let i = 0; i < validRatings.length; i += ratingBatchSize) {
         const chunk = validRatings.slice(i, i + ratingBatchSize);
         await Promise.all(chunk.map(async (item) => {
