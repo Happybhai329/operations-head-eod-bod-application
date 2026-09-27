@@ -67,6 +67,12 @@ export class SyncController {
    */
   public static async triggerSync(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      // Re-queue any FAILED jobs so manual sync retry attempts them
+      await prisma.syncJob.updateMany({
+        where: { status: 'FAILED' },
+        data: { status: 'PENDING', attempts: 0, nextAttemptAt: null, error: null },
+      });
+
       const stats = await SheetsSyncWorker.processPendingJobs();
       res.status(200).json({
         success: true,
