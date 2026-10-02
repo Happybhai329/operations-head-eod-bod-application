@@ -18,9 +18,12 @@ export function dateToDDMMYYYY(cellValue: any): string {
   } else if (typeof cellValue === 'string' && cellValue.includes('/')) {
     const parts = cellValue.trim().split('/');
     if (parts.length === 3) {
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
+      let day = parseInt(parts[0], 10);
+      let month = parseInt(parts[1], 10) - 1;
       const year = parseInt(parts[2], 10);
+      if (month > 11 && day <= 12) {
+        const tmp = day; day = month + 1; month = tmp - 1;
+      }
       d = new Date(year, month, day);
     } else {
       d = new Date(cellValue);
@@ -60,24 +63,49 @@ export function dateToDDMMYYYY(cellValue: any): string {
  */
 export function parseSafeDate(val: any): Date {
   if (!val) return new Date();
-  if (val instanceof Date && !isNaN(val.getTime())) return val;
+  if (val instanceof Date && !isNaN(val.getTime())) {
+    return val.getTime() > Date.now() + 3600000 ? new Date() : val;
+  }
   const str = String(val).trim();
   if (!str) return new Date();
+
+  const nowMs = Date.now();
 
   // Match DD/MM/YYYY or DD-MM-YYYY (with optional HH:mm:ss)
   const match = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
   if (match) {
-    const day = parseInt(match[1], 10);
-    const month = parseInt(match[2], 10) - 1;
+    let day = parseInt(match[1], 10);
+    let month = parseInt(match[2], 10) - 1;
     const year = parseInt(match[3], 10);
     const hour = match[4] ? parseInt(match[4], 10) : 0;
     const min = match[5] ? parseInt(match[5], 10) : 0;
     const sec = match[6] ? parseInt(match[6], 10) : 0;
-    const d = new Date(year, month, day, hour, min, sec);
+
+    if (month > 11 && day <= 12) {
+      const tmp = day; day = month + 1; month = tmp - 1;
+    }
+
+    let d = new Date(year, month, day, hour, min, sec);
+    // If treating as DD/MM produces a future date, but swapping day and month produces a valid past date
+    if (!isNaN(d.getTime()) && d.getTime() > nowMs + 3600000 && day <= 12 && (month + 1) <= 12) {
+      const swapped = new Date(year, day - 1, month + 1, hour, min, sec);
+      if (!isNaN(swapped.getTime()) && swapped.getTime() <= nowMs + 3600000) {
+        d = swapped;
+      }
+    }
+
+    // Hard ceiling: no report/update timestamp can legitimately be in the future
+    if (!isNaN(d.getTime()) && d.getTime() > nowMs + 3600000) {
+      return new Date(nowMs);
+    }
+
     if (!isNaN(d.getTime())) return d;
   }
 
   const d = new Date(str);
+  if (!isNaN(d.getTime()) && d.getTime() > nowMs + 3600000) {
+    return new Date(nowMs);
+  }
   return isNaN(d.getTime()) ? new Date() : d;
 }
 
