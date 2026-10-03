@@ -300,10 +300,17 @@ export class SheetsInboundSync {
             if (computed > 0) sysScore = computed;
           }
 
+          const isTodayReport = reportDate === dateToDDMMYYYY(new Date());
+
           if (approvalStatus === 'Auto Approved' || headRating === 'Auto') {
-            approvalStatus = 'Auto Approved';
-            headRating = '100';
-          } else if ((!headRating || headRating === '' || headRating === 'Auto') && approvalStatus !== 'Approved' && hoursSinceUpdate >= 24) {
+            if (isTodayReport) {
+              approvalStatus = 'Pending Review';
+              headRating = null;
+            } else {
+              approvalStatus = 'Auto Approved';
+              headRating = '100';
+            }
+          } else if ((!headRating || headRating === '' || headRating === 'Auto') && approvalStatus !== 'Approved' && hoursSinceUpdate >= 24 && !isTodayReport) {
             approvalStatus = 'Auto Approved';
             headRating = '100';
           }
