@@ -244,24 +244,16 @@ export class TrackerService {
       let effectiveHeadRating: string | null = rawHeadRating;
       let effectiveFinalScore: number | null = rawFinalScore;
 
+      const isToday = dk >= getUtcMidnight(new Date());
+
       if (eodFilled) {
-        if (rawApprovalStatus === 'Auto Approved' || rawHeadRating === 'Auto') {
-          effectiveApprovalStatus = 'Auto Approved';
-          effectiveHeadRating = '100';
-          effectiveFinalScore = rawSysScore;
-        } else if (rawApprovalStatus === 'Approved') {
+        if (rawApprovalStatus === 'Approved' || (rawHeadRating && rawHeadRating !== '' && rawHeadRating !== 'Auto')) {
           effectiveApprovalStatus = 'Approved';
           effectiveHeadRating = rawHeadRating || '100';
           effectiveFinalScore = rawFinalScore ?? (rawSysScore !== null && !isNaN(parseFloat(effectiveHeadRating))
             ? Math.round((rawSysScore * parseFloat(effectiveHeadRating)) / 100)
             : rawSysScore);
-        } else if (rawHeadRating && rawHeadRating !== '' && rawHeadRating !== 'Auto') {
-          effectiveApprovalStatus = 'Approved';
-          effectiveHeadRating = rawHeadRating;
-          effectiveFinalScore = rawFinalScore ?? (rawSysScore !== null && !isNaN(parseFloat(effectiveHeadRating))
-            ? Math.round((rawSysScore * parseFloat(effectiveHeadRating)) / 100)
-            : rawSysScore);
-        } else if (hoursSinceUpdate >= 24) {
+        } else if (!isToday && (rawApprovalStatus === 'Auto Approved' || rawHeadRating === 'Auto' || hoursSinceUpdate >= 24)) {
           effectiveApprovalStatus = 'Auto Approved';
           effectiveHeadRating = '100';
           effectiveFinalScore = rawSysScore;
@@ -479,10 +471,25 @@ export class TrackerService {
     const deptInfo = deptName ? await prisma.department.findFirst({ where: { departmentName: { equals: deptName, mode: 'insensitive' } } }) : null;
     const headName = deptInfo?.headName || null;
 
-    const headRating = report.headRating || (report.head_rating !== null && report.head_rating !== undefined ? String(report.head_rating) : null) || (report.approval_status === 'Auto Approved' ? '100' : (report.approval_status === 'Approved' ? '100' : null));
+    const reportDateStr = report.reportDate || report.date || '';
+    const d = parseDateDDMMYYYY(reportDateStr);
+    const isToday = !isNaN(d.getTime()) && getUtcMidnight(d) >= getUtcMidnight(new Date());
+
+    let approvalStatus = report.approval_status;
+    let headRating = report.headRating || (report.head_rating !== null && report.head_rating !== undefined ? String(report.head_rating) : null);
+
+    if (isToday && approvalStatus === 'Auto Approved') {
+      approvalStatus = 'Pending Review';
+      headRating = null;
+    } else if (approvalStatus === 'Auto Approved') {
+      headRating = headRating || '100';
+    } else if (approvalStatus === 'Approved') {
+      headRating = headRating || '100';
+    }
+
     const systemScore = report.systemScore ?? report.system_score;
     const finalScore = report.finalScore ?? report.final_score ?? (
-      report.approval_status === 'Auto Approved' || headRating === '100'
+      approvalStatus === 'Auto Approved' || headRating === '100'
         ? systemScore
         : (headRating && !isNaN(parseFloat(headRating)) && systemScore !== null && systemScore !== undefined
             ? Math.round((systemScore * parseFloat(headRating)) / 100)
@@ -501,7 +508,7 @@ export class TrackerService {
       headRating,
       finalScore,
       updatedAt: report.lastUpdated || report.last_updated,
-      approvalStatus: report.approval_status,
+      approvalStatus,
     };
   }
 }
