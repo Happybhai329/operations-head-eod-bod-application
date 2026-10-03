@@ -302,7 +302,11 @@ export class SheetsInboundSync {
 
           const isTodayReport = reportDate === dateToDDMMYYYY(new Date());
 
-          if (approvalStatus === 'Auto Approved' || headRating === 'Auto') {
+          const isAutoStatus = approvalStatus === 'Auto Approved' ||
+                               approvalStatus === 'Auto Approved (24h)' ||
+                               (typeof approvalStatus === 'string' && approvalStatus.startsWith('Auto Approved'));
+
+          if (isAutoStatus || headRating === 'Auto') {
             if (isTodayReport) {
               approvalStatus = 'Pending Review';
               headRating = null;

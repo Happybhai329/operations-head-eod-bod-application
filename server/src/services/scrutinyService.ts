@@ -152,7 +152,7 @@ export class ScrutinyService {
       if (!effectiveHeadRating || effectiveHeadRating.trim() === '') {
         if (r.head_rating !== null && r.head_rating !== undefined && String(r.head_rating).trim() !== '') {
           effectiveHeadRating = String(r.head_rating).trim();
-        } else if (r.approval_status === 'Auto Approved') {
+        } else if (r.approval_status === 'Auto Approved' || r.approval_status === 'Auto Approved (24h)' || (typeof r.approval_status === 'string' && r.approval_status.startsWith('Auto Approved'))) {
           effectiveHeadRating = '100';
         } else if (r.approval_status === 'Approved') {
           effectiveHeadRating = '100';

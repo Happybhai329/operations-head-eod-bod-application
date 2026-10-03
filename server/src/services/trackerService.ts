@@ -245,15 +245,22 @@ export class TrackerService {
       let effectiveFinalScore: number | null = rawFinalScore;
 
       const isToday = dk >= getUtcMidnight(new Date());
+      const isAutoStatus = rawApprovalStatus === 'Auto Approved' ||
+                           rawApprovalStatus === 'Auto Approved (24h)' ||
+                           (typeof rawApprovalStatus === 'string' && rawApprovalStatus.startsWith('Auto Approved'));
 
       if (eodFilled) {
-        if (rawApprovalStatus === 'Approved' || (rawHeadRating && rawHeadRating !== '' && rawHeadRating !== 'Auto')) {
+        if (!isToday && isAutoStatus) {
+          effectiveApprovalStatus = 'Auto Approved';
+          effectiveHeadRating = '100';
+          effectiveFinalScore = rawSysScore;
+        } else if (rawApprovalStatus === 'Approved' || (!isAutoStatus && rawHeadRating && rawHeadRating !== '' && rawHeadRating !== 'Auto')) {
           effectiveApprovalStatus = 'Approved';
           effectiveHeadRating = rawHeadRating || '100';
           effectiveFinalScore = rawFinalScore ?? (rawSysScore !== null && !isNaN(parseFloat(effectiveHeadRating))
             ? Math.round((rawSysScore * parseFloat(effectiveHeadRating)) / 100)
             : rawSysScore);
-        } else if (!isToday && (rawApprovalStatus === 'Auto Approved' || rawHeadRating === 'Auto' || hoursSinceUpdate >= 24)) {
+        } else if (!isToday && (rawHeadRating === 'Auto' || hoursSinceUpdate >= 24)) {
           effectiveApprovalStatus = 'Auto Approved';
           effectiveHeadRating = '100';
           effectiveFinalScore = rawSysScore;
@@ -478,10 +485,15 @@ export class TrackerService {
     let approvalStatus = report.approval_status;
     let headRating = report.headRating || (report.head_rating !== null && report.head_rating !== undefined ? String(report.head_rating) : null);
 
-    if (isToday && approvalStatus === 'Auto Approved') {
+    const isAutoStatus = approvalStatus === 'Auto Approved' ||
+                         approvalStatus === 'Auto Approved (24h)' ||
+                         (typeof approvalStatus === 'string' && approvalStatus.startsWith('Auto Approved'));
+
+    if (isToday && (isAutoStatus || headRating === 'Auto')) {
       approvalStatus = 'Pending Review';
       headRating = null;
-    } else if (approvalStatus === 'Auto Approved') {
+    } else if (isAutoStatus) {
+      approvalStatus = 'Auto Approved';
       headRating = headRating || '100';
     } else if (approvalStatus === 'Approved') {
       headRating = headRating || '100';

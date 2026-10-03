@@ -138,7 +138,7 @@ export function calculateEmployeeDailyFinalScore(
   const statusStr = approvalStatus !== null && approvalStatus !== undefined ? String(approvalStatus).trim() : '';
 
   // Explicit approval from status column or auto-approval rules
-  if (statusStr === 'Auto Approved' || ratingStr === 'Auto') {
+  if (statusStr === 'Auto Approved' || statusStr === 'Auto Approved (24h)' || statusStr.startsWith('Auto Approved') || ratingStr === 'Auto') {
     isAutoApproved = true;
     finalScore = sysScore;
   } else if ((!ratingStr || ratingStr === '') && statusStr !== 'Approved' && hoursSinceUpdate >= 24) {
