@@ -17,6 +17,17 @@ import { parseScoreHelper, calculateEmployeeDailyFinalScore, calculatePerformanc
 const INBOUND_SYNC_INTERVAL_MS = parseInt(process.env.INBOUND_SYNC_INTERVAL_MS || '180000', 10); // 3 minutes default
 const SYNC_LOOKBACK_DAYS = parseInt(process.env.SYNC_LOOKBACK_DAYS || '7', 10); // Only sync last N days
 
+function isReviewWindowOpen(reportDateStr: string): boolean {
+  if (!reportDateStr) return false;
+  const parts = reportDateStr.split('/');
+  if (parts.length !== 3) return false;
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const year = parseInt(parts[2], 10);
+  const nextDayEnd = new Date(year, month, day + 1, 23, 59, 59, 999).getTime();
+  return Date.now() <= nextDayEnd;
+}
+
 export class SheetsInboundSync {
   private static timer: NodeJS.Timeout | null = null;
   private static isRunning = false;
@@ -301,20 +312,21 @@ export class SheetsInboundSync {
           }
 
           const isTodayReport = reportDate === dateToDDMMYYYY(new Date());
+          const reviewWindowOpen = isTodayReport || isReviewWindowOpen(reportDate);
 
           const isAutoStatus = approvalStatus === 'Auto Approved' ||
                                approvalStatus === 'Auto Approved (24h)' ||
                                (typeof approvalStatus === 'string' && approvalStatus.startsWith('Auto Approved'));
 
           if (isAutoStatus || headRating === 'Auto') {
-            if (isTodayReport) {
+            if (reviewWindowOpen) {
               approvalStatus = 'Pending Review';
               headRating = null;
             } else {
               approvalStatus = 'Auto Approved';
               headRating = '100';
             }
-          } else if ((!headRating || headRating === '' || headRating === 'Auto') && approvalStatus !== 'Approved' && hoursSinceUpdate >= 24 && !isTodayReport) {
+          } else if ((!headRating || headRating === '' || headRating === 'Auto') && approvalStatus !== 'Approved' && !reviewWindowOpen && hoursSinceUpdate >= 24) {
             approvalStatus = 'Auto Approved';
             headRating = '100';
           }
