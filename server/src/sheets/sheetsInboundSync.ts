@@ -383,6 +383,61 @@ export class SheetsInboundSync {
         const chunk = validRecords.slice(i, i + reportBatchSize);
         await Promise.all(chunk.map(async (rec) => {
           try {
+            const existingDb = await prisma.dailyReport.findUnique({
+              where: { employeeId_reportDate: { employeeId: rec.empId, reportDate: rec.reportDate } },
+            });
+
+            // Safeguard: Never overwrite non-empty DB data with empty Sheet data!
+            const dbHasEod = Boolean(
+              (existingDb?.eodData && typeof existingDb.eodData === 'object' && Object.keys(existingDb.eodData as any).length > 0) ||
+              (existingDb?.eod_data && typeof existingDb.eod_data === 'string' && existingDb.eod_data.trim().length > 2 && existingDb.eod_data.trim() !== '{}')
+            );
+            const sheetHasEod = Boolean(
+              (rec.eodData && typeof rec.eodData === 'object' && Object.keys(rec.eodData).length > 0) ||
+              (rec.eodStr && typeof rec.eodStr === 'string' && rec.eodStr.trim().length > 2 && rec.eodStr.trim() !== '{}')
+            );
+
+            const dbHasBod = Boolean(
+              (existingDb?.bodData && typeof existingDb.bodData === 'object' && Object.keys(existingDb.bodData as any).length > 0) ||
+              (existingDb?.bod_data && typeof existingDb.bod_data === 'string' && existingDb.bod_data.trim().length > 2 && existingDb.bod_data.trim() !== '{}')
+            );
+            const sheetHasBod = Boolean(
+              (rec.bodData && typeof rec.bodData === 'object' && Object.keys(rec.bodData).length > 0) ||
+              (rec.bodStr && typeof rec.bodStr === 'string' && rec.bodStr.trim().length > 2 && rec.bodStr.trim() !== '{}')
+            );
+
+            const finalBodData = sheetHasBod ? rec.bodData : (existingDb?.bodData ?? rec.bodData);
+            const finalBodStr = sheetHasBod ? rec.bodStr : (existingDb?.bod_data ?? rec.bodStr);
+            const finalEodData = sheetHasEod ? rec.eodData : (existingDb?.eodData ?? rec.eodData);
+            const finalEodStr = sheetHasEod ? rec.eodStr : (existingDb?.eod_data ?? rec.eodStr);
+
+            let finalApprovalStatus = rec.approvalStatus;
+            let finalSystemScore = rec.sysScore;
+            let finalHeadRating = rec.headRating || null;
+            let finalHeadRatingNum = rec.headRatingNum;
+            let finalFinalScore = rec.finalScore;
+
+            if (dbHasEod && !sheetHasEod) {
+              finalApprovalStatus = existingDb?.approval_status ?? 'Pending Review';
+              finalSystemScore = existingDb?.systemScore ?? existingDb?.system_score ?? 100;
+              finalFinalScore = existingDb?.finalScore ?? existingDb?.final_score ?? finalSystemScore;
+              finalHeadRating = existingDb?.headRating ?? (existingDb?.head_rating ? String(existingDb.head_rating) : null);
+              finalHeadRatingNum = existingDb?.head_rating ?? (finalHeadRating ? parseFloat(finalHeadRating) : null);
+
+              // Auto-heal Google Sheet so it gets the missing EOD data
+              GoogleSheetsClient.syncDailyReportRow(env.APP_DB_SPREADSHEET_ID, {
+                reportDate: rec.reportDate,
+                employeeId: rec.empId,
+                departmentName: rec.dept,
+                bodData: finalBodData,
+                eodData: finalEodData,
+                systemScore: finalSystemScore,
+                lastUpdated: rec.lastUpdatedStr,
+                headRating: finalHeadRating || undefined,
+                finalScore: finalFinalScore,
+              }).catch(() => {});
+            }
+
             await prisma.dailyReport.upsert({
               where: { employeeId_reportDate: { employeeId: rec.empId, reportDate: rec.reportDate } },
               create: {
@@ -390,45 +445,45 @@ export class SheetsInboundSync {
                 dateTimestamp: BigInt(rec.dateTimestamp),
                 employeeId: rec.empId,
                 departmentName: rec.dept,
-                bodData: rec.bodData,
-                eodData: rec.eodData,
-                systemScore: rec.sysScore,
-                headRating: rec.headRating || null,
-                finalScore: rec.finalScore,
+                bodData: finalBodData,
+                eodData: finalEodData,
+                systemScore: finalSystemScore,
+                headRating: finalHeadRating,
+                finalScore: finalFinalScore,
                 lastUpdated: rec.lastUpdated,
                 // snake_case columns for full parity with employee app & PostgreSQL
                 date: rec.reportDate,
                 employee_id: rec.empId,
                 department: rec.dept,
-                bod_data: rec.bodStr,
-                eod_data: rec.eodStr,
-                system_score: rec.sysScore,
-                head_rating: rec.headRatingNum,
-                final_score: rec.finalScore,
+                bod_data: finalBodStr,
+                eod_data: finalEodStr,
+                system_score: finalSystemScore,
+                head_rating: finalHeadRatingNum,
+                final_score: finalFinalScore,
                 last_updated: rec.lastUpdatedStr,
-                approval_status: rec.approvalStatus,
+                approval_status: finalApprovalStatus,
                 approval_timestamp: rec.approvalTimestamp,
                 expiry_timestamp: rec.expiryTimestamp,
               },
               update: {
                 departmentName: rec.dept,
-                bodData: rec.bodData,
-                eodData: rec.eodData,
-                systemScore: rec.sysScore,
-                headRating: rec.headRating || null,
-                finalScore: rec.finalScore,
+                bodData: finalBodData,
+                eodData: finalEodData,
+                systemScore: finalSystemScore,
+                headRating: finalHeadRating,
+                finalScore: finalFinalScore,
                 lastUpdated: rec.lastUpdated,
                 // snake_case columns
                 date: rec.reportDate,
                 employee_id: rec.empId,
                 department: rec.dept,
-                bod_data: rec.bodStr,
-                eod_data: rec.eodStr,
-                system_score: rec.sysScore,
-                head_rating: rec.headRatingNum,
-                final_score: rec.finalScore,
+                bod_data: finalBodStr,
+                eod_data: finalEodStr,
+                system_score: finalSystemScore,
+                head_rating: finalHeadRatingNum,
+                final_score: finalFinalScore,
                 last_updated: rec.lastUpdatedStr,
-                approval_status: rec.approvalStatus,
+                approval_status: finalApprovalStatus,
                 approval_timestamp: rec.approvalTimestamp,
                 expiry_timestamp: rec.expiryTimestamp,
               },
