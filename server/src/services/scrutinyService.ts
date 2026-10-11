@@ -117,7 +117,13 @@ export class ScrutinyService {
     >();
 
     for (const r of dailyReports) {
-      // Must have EOD data
+      const bodRaw = r.bodData || r.bod_data;
+      const hasBOD =
+        bodRaw &&
+        (typeof bodRaw === 'string'
+          ? bodRaw.trim() !== '' && bodRaw !== '{}'
+          : Object.keys(bodRaw as object).length > 0);
+
       const eodRaw = r.eodData || r.eod_data;
       const hasEOD =
         eodRaw &&
@@ -125,7 +131,8 @@ export class ScrutinyService {
           ? eodRaw.trim() !== '' && eodRaw !== '{}'
           : Object.keys(eodRaw as object).length > 0);
 
-      if (!hasEOD) continue;
+      // Must have either BOD or EOD data
+      if (!hasBOD && !hasEOD) continue;
 
       const dateStr = r.reportDate || r.date || '';
       if (!dateStr) continue;
@@ -147,7 +154,34 @@ export class ScrutinyService {
         try { eodObj = JSON.parse(eodObj); } catch (_) {}
       }
 
-      // Fallback head rating resolution
+      const empIdTrimmed = (r.employeeId || r.employee_id || '').trim();
+      const empInfo = empMap.get(empIdTrimmed);
+
+      if (!hasEOD) {
+        // Employee submitted BOD, but EOD is pending or was missed
+        const reportTime = getTimeFromDDMMYYYY(dateStr);
+        const todayMidnight = new Date().setHours(0, 0, 0, 0);
+        const isPastDate = reportTime < todayMidnight;
+        const pendingStatus =
+          r.approval_status === 'Pending EOD' || r.approval_status === 'EOD Missed'
+            ? r.approval_status
+            : isPastDate
+            ? 'EOD Missed'
+            : 'Pending EOD';
+
+        dailyAgg.get(dateStr)!.records.push({
+          empId: empIdTrimmed,
+          empName: empInfo?.name || 'Name Not Found',
+          sysScore: 0,
+          headRating: pendingStatus,
+          finalScore: 0,
+          bodData: bodObj || {},
+          eodData: eodObj || {},
+        });
+        continue;
+      }
+
+      // Fallback head rating resolution for submitted EOD
       let effectiveHeadRating = r.headRating;
       if (!effectiveHeadRating || effectiveHeadRating.trim() === '') {
         if (r.head_rating !== null && r.head_rating !== undefined && String(r.head_rating).trim() !== '') {
@@ -168,9 +202,6 @@ export class ScrutinyService {
         eodObj,
         r.approval_status
       );
-
-      const empIdTrimmed = (r.employeeId || r.employee_id || '').trim();
-      const empInfo = empMap.get(empIdTrimmed);
 
       const displayHeadRating =
         effectiveHeadRating && effectiveHeadRating !== ''
@@ -195,7 +226,11 @@ export class ScrutinyService {
 
     for (const [dateStr, group] of dailyAgg.entries()) {
       const recs = group.records;
-      const baseAvg = calculateDateBaseAverage(recs.map((r) => r.finalScore));
+      // Filter out Pending EOD / EOD Missed records so they don't artificially dilute completed reports average
+      const scoredRecs = recs.filter((r) => r.headRating !== 'Pending EOD' && r.headRating !== 'EOD Missed');
+      const baseAvg = scoredRecs.length > 0
+        ? calculateDateBaseAverage(scoredRecs.map((r) => r.finalScore))
+        : 0;
       const calculatedFinal =
         group.adminRating !== ''
           ? calculateSuperAdminFinalScore(baseAvg, group.adminRating)

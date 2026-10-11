@@ -193,10 +193,26 @@ export const DepartmentScrutinyModal: React.FC<DepartmentScrutinyModalProps> = (
                                 <div className="text-[11px] text-slate-400 font-mono">{r.empId}</div>
                               </td>
                               <td className="py-2.5 px-3 text-center font-bold text-slate-700">
-                                {r.sysScore}%
+                                {r.headRating === 'Pending EOD' ? (
+                                  <span className="text-slate-400 font-normal italic">-</span>
+                                ) : (
+                                  `${r.sysScore}%`
+                                )}
                               </td>
                               <td className="py-2.5 px-3 text-center">
-                                {r.headRating !== 'Auto' ? (
+                                {r.headRating === 'Pending EOD' ? (
+                                  <span className="px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-800 font-bold text-xs">
+                                    ⏳ Pending EOD
+                                  </span>
+                                ) : r.headRating === 'EOD Missed' ? (
+                                  <span className="px-2.5 py-1 rounded-full bg-rose-100 border border-rose-300 text-rose-800 font-bold text-xs">
+                                    ❌ EOD Missed
+                                  </span>
+                                ) : r.headRating === 'Pending' ? (
+                                  <span className="px-2.5 py-1 rounded-full bg-blue-100 border border-blue-300 text-blue-800 font-bold text-xs">
+                                    Pending Review
+                                  </span>
+                                ) : r.headRating !== 'Auto' ? (
                                   <span className="font-extrabold text-indigo-600">
                                     {r.headRating}%
                                   </span>
@@ -216,11 +232,34 @@ export const DepartmentScrutinyModal: React.FC<DepartmentScrutinyModalProps> = (
                                       eod: r.eodData,
                                     })
                                   }
-                                  className="w-full text-left flex items-center justify-between px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50/60 hover:bg-emerald-100/70 text-emerald-800 font-bold text-xs transition-all"
+                                  className={`w-full text-left flex items-center justify-between px-3 py-1.5 rounded-lg border font-bold text-xs transition-all ${
+                                    r.headRating === 'Pending EOD'
+                                      ? 'border-amber-300 bg-amber-50/70 hover:bg-amber-100 text-amber-900'
+                                      : r.headRating === 'EOD Missed'
+                                      ? 'border-rose-300 bg-rose-50/70 hover:bg-rose-100 text-rose-900'
+                                      : 'border-emerald-300 bg-emerald-50/60 hover:bg-emerald-100/70 text-emerald-800'
+                                  }`}
                                 >
-                                  <span>{r.finalScore}%</span>
-                                  <span className="flex items-center gap-1 text-[11px] text-emerald-700">
-                                    <Eye className="w-3.5 h-3.5" /> View BOD/EOD
+                                  <span>
+                                    {r.headRating === 'Pending EOD'
+                                      ? 'Pending EOD'
+                                      : r.headRating === 'EOD Missed'
+                                      ? '0% (Missed)'
+                                      : `${r.finalScore}%`}
+                                  </span>
+                                  <span
+                                    className={`flex items-center gap-1 text-[11px] ${
+                                      r.headRating === 'Pending EOD'
+                                        ? 'text-amber-700'
+                                        : r.headRating === 'EOD Missed'
+                                        ? 'text-rose-700'
+                                        : 'text-emerald-700'
+                                    }`}
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />{' '}
+                                    {r.headRating === 'Pending EOD' || r.headRating === 'EOD Missed'
+                                      ? 'View BOD'
+                                      : 'View BOD/EOD'}
                                   </span>
                                 </button>
                               </td>
