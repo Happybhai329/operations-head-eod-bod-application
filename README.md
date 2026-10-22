@@ -4,6 +4,23 @@ Enterprise full-stack web application converting the legacy Google Apps Script B
 
 ---
 
+<div align="center">
+
+[![GitHub](https://img.shields.io/badge/GitHub-Happybhai329-181717?style=for-the-badge&logo=github)](https://github.com/Happybhai329)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Happy%20Bhasin-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/happy-bhasin-908191267)
+[![Email](https://img.shields.io/badge/Email-bhasinhappy0506%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:bhasinhappy0506@gmail.com)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-5.18-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+
+</div>
+
+---
+
+
 ## 🏛️ System Architecture
 
 ```
@@ -173,3 +190,60 @@ This repository includes a pre-configured [`render.yaml`](render.yaml) blueprint
    - `SYNC_WORKER_ENABLED`: `true`
 5. Click **Deploy Web Service**. Once the build finishes, you can access your dashboard via your live `https://[your-service-name].onrender.com` link.
 
+---
+
+## 📡 API Reference
+
+| Method | Endpoint | Description | Auth Required |
+|:---|:---|:---|:---:|
+| `POST` | `/api/auth/admin/login` | Super Admin session authentication via code | No |
+| `GET` | `/api/admin/dashboard` | Fetch aggregated organization score, rankings, and grid | Yes (`Bearer Token`) |
+| `GET` | `/api/admin/departments/:dept/scrutiny` | Deep-dive departmental reports and employees | Yes (`Bearer Token`) |
+| `PUT` | `/api/admin/departments/:dept/head-rating` | Update department head rating (enqueues sync job) | Yes (`Bearer Token`) |
+| `GET` | `/health` | Service health check and database connectivity | No |
+
+---
+
+## 📂 Project Structure
+
+```
+operations-head-eod-bod-application/
+├── client/                     # React 18 + TypeScript + Vite Frontend
+│   ├── src/
+│   │   ├── api/                # API client functions (JWT handling)
+│   │   ├── components/         # Modals, scorecards, grids, leaderboards
+│   │   ├── types/              # TypeScript interfaces
+│   │   └── App.tsx             # Main dashboard layout
+│   └── package.json
+├── server/                     # Express.js + Prisma Backend API
+│   ├── prisma/
+│   │   └── schema.prisma       # PostgreSQL models & indexes
+│   ├── src/
+│   │   ├── controllers/        # Request controllers
+│   │   ├── middleware/         # Auth, rate-limiting, error handling
+│   │   ├── routes/             # REST routing
+│   │   ├── scripts/            # Seed & Google Sheets migration scripts
+│   │   └── sync/               # Outbox background sync worker
+│   └── package.json
+├── render.yaml                 # Render Blueprint specification
+└── README.md
+```
+
+---
+
+## 👤 Author & Maintainer
+
+**Happy Bhasin**  
+*Full Stack & AI Engineer* | Amity University Madhya Pradesh (B.Tech CSE with Minor in AI/ML)  
+
+- 🌐 **GitHub:** [@Happybhai329](https://github.com/Happybhai329)  
+- 💼 **LinkedIn:** [Happy Bhasin](https://www.linkedin.com/in/happy-bhasin-908191267)  
+- 📧 **Email:** [bhasinhappy0506@gmail.com](mailto:bhasinhappy0506@gmail.com)  
+- 📱 **Phone:** +91 9220553665  
+- 📍 **Location:** India (Open to Remote & Global Relocation)  
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
