@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "types": ["node", "express"],
     "resolveJsonModule": true,
     "noEmitOnError": false
   },

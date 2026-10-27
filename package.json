@@ -11,7 +11,7 @@
     "build:client": "cd client && npm run build",
     "build": "npm run build:server && npm run build:client",
     "start": "cd server && npm start",
-    "render-build": "npm install && cd server && npm install && npx prisma generate && npm run build && cd ../client && npm install && npm run build",
+    "render-build": "npm install --include=dev && cd server && npm install --include=dev && npx prisma generate && npm run build && cd ../client && npm install --include=dev && npm run build",
     "render-start": "cd server && node dist/index.js",
     "prisma:generate": "cd server && npx prisma generate",
     "prisma:migrate": "cd server && npx prisma migrate dev",
