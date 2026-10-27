@@ -11,7 +11,6 @@
     "skipDefaultLibCheck": true,
     "types": ["node", "express", "jest"],
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
