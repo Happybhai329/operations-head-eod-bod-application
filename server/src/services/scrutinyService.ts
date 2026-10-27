@@ -182,8 +182,8 @@ export class ScrutinyService {
       }
 
       // Fallback head rating resolution for submitted EOD
-      let effectiveHeadRating = r.headRating;
-      if (!effectiveHeadRating || effectiveHeadRating.trim() === '') {
+      let effectiveHeadRating = r.headRating !== null && r.headRating !== undefined ? String(r.headRating).trim() : '';
+      if (!effectiveHeadRating || effectiveHeadRating === '') {
         if (r.head_rating !== null && r.head_rating !== undefined && String(r.head_rating).trim() !== '') {
           effectiveHeadRating = String(r.head_rating).trim();
         } else if (r.approval_status === 'Auto Approved' || r.approval_status === 'Auto Approved (24h)' || (typeof r.approval_status === 'string' && r.approval_status.startsWith('Auto Approved'))) {

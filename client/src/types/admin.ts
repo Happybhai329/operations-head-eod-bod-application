@@ -151,6 +151,59 @@ export interface SubmissionDetail {
   approvalStatus?: string | null;
 }
 
+export interface ActiveEmployeeItem {
+  id: string;
+  name: string;
+  dept: string;
+  subDept?: string;
+  role?: string;
+}
+
+export interface EmployeeReportDailyRecord {
+  date: string;
+  timestamp: number;
+  hasSubmission: boolean;
+  bodSubmitted: boolean;
+  eodSubmitted: boolean;
+  status: string;
+  bodContent: any;
+  eodContent: any;
+  systemScore: number | null;
+  headRating: string | null;
+  finalScore: number | null;
+  approvalStatus: string;
+  lastUpdated: string | null;
+}
+
+export interface EmployeeBodEodReportData {
+  employee: {
+    id: string;
+    name: string;
+    department: string;
+    subDepartment?: string;
+    role?: string;
+  };
+  headName: string;
+  dateRange: {
+    start: string;
+    end: string;
+    totalDays: number;
+  };
+  stats: {
+    totalDays: number;
+    submittedDays: number;
+    bothSubmittedDays: number;
+    bodOnlyDays: number;
+    eodOnlyDays: number;
+    missedDays: number;
+    approvedDays: number;
+    autoApprovedDays: number;
+    pendingReviewDays: number;
+    avgScore: number | null;
+  };
+  records: EmployeeReportDailyRecord[];
+}
+
 // ─── TASK MANAGEMENT TYPES ────────────────────────────────────
 export interface ChecklistItem {
   itemId: string;

@@ -44,6 +44,8 @@ router.put('/admin/departments/:departmentName/head-rating', requireAdminAuth, R
 // ------------------------------------------
 router.get('/tracker/submissions', TrackerController.getSubmissionTracker);
 router.get('/tracker/submission-detail', TrackerController.getSubmissionDetail);
+router.get('/tracker/employees', TrackerController.getEmployeeList);
+router.get('/tracker/employee-report', TrackerController.getEmployeeReport);
 
 // ------------------------------------------
 // TASK MANAGEMENT ROUTES

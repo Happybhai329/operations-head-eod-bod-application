@@ -232,7 +232,7 @@ export class TrackerService {
           : Object.keys(eodData as object).length > 0)
       );
 
-      let rawHeadRating = r.headRating || (r.head_rating !== null && r.head_rating !== undefined ? String(r.head_rating).trim() : null);
+      let rawHeadRating: string | null = (r.headRating !== null && r.headRating !== undefined ? String(r.headRating).trim() : null) || (r.head_rating !== null && r.head_rating !== undefined ? String(r.head_rating).trim() : null);
       let rawSysScore = r.systemScore ?? r.system_score ?? null;
       let rawFinalScore = r.finalScore ?? r.final_score ?? null;
       let rawApprovalStatus = r.approval_status ? String(r.approval_status).trim() : null;
@@ -291,7 +291,7 @@ export class TrackerService {
         headRating: effectiveHeadRating,
         finalScore: effectiveFinalScore,
         approvalStatus: effectiveApprovalStatus,
-        lastUpdated: r.lastUpdated ? (r.lastUpdated instanceof Date ? r.lastUpdated.toISOString() : String(r.lastUpdated)) : ((r as any).last_updated ? ((r as any).last_updated instanceof Date ? (r as any).last_updated.toISOString() : String((r as any).last_updated)) : null),
+        lastUpdated: r.lastUpdated ? String(r.lastUpdated) : ((r as any).last_updated ? String((r as any).last_updated) : null),
       });
 
       if (empId && !empById.has(empId)) {
@@ -483,7 +483,7 @@ export class TrackerService {
     const isToday = !isNaN(d.getTime()) && getUtcMidnight(d) >= getUtcMidnight(new Date());
 
     let approvalStatus = report.approval_status;
-    let headRating = report.headRating || (report.head_rating !== null && report.head_rating !== undefined ? String(report.head_rating) : null);
+    let headRating: string | null = (report.headRating !== null && report.headRating !== undefined ? String(report.headRating) : null) || (report.head_rating !== null && report.head_rating !== undefined ? String(report.head_rating) : null);
 
     const isAutoStatus = approvalStatus === 'Auto Approved' ||
                          approvalStatus === 'Auto Approved (24h)' ||
@@ -521,6 +521,302 @@ export class TrackerService {
       finalScore,
       updatedAt: report.lastUpdated || report.last_updated,
       approvalStatus,
+    };
+  }
+
+  public static async fetchActiveEmployeesList() {
+    const employees = await prisma.employee.findMany({
+      where: {
+        status: { equals: 'active', mode: 'insensitive' },
+      },
+      orderBy: { name: 'asc' },
+      select: {
+        employeeId: true,
+        name: true,
+        department: true,
+        subDepartment: true,
+        role: true,
+      },
+    });
+
+    return employees.map((e) => ({
+      id: e.employeeId.trim(),
+      name: e.name.trim(),
+      dept: e.department.trim(),
+      subDept: e.subDepartment?.trim() || '',
+      role: e.role,
+    }));
+  }
+
+  public static async fetchEmployeeBodEodReport(empId: string, start: string, end: string) {
+    const trimmedEmpId = empId.trim();
+    const startD = parseDateInput(start);
+    const endD = parseDateInput(end);
+
+    if (!startD || !endD) {
+      throw new Error('Invalid start or end date provided.');
+    }
+
+    startD.setHours(0, 0, 0, 0);
+    endD.setHours(23, 59, 59, 999);
+
+    if (endD.getTime() < startD.getTime()) {
+      throw new Error('End date cannot be earlier than start date.');
+    }
+
+    // 1. Fetch employee info
+    let employee = await prisma.employee.findUnique({
+      where: { employeeId: trimmedEmpId },
+    });
+
+    if (!employee) {
+      employee = await prisma.employee.findFirst({
+        where: { employeeId: { equals: trimmedEmpId, mode: 'insensitive' } },
+      });
+    }
+
+    // 2. Fetch department head info
+    const deptName = employee?.department || '';
+    let headName: string | null = null;
+    if (deptName) {
+      const dept = await prisma.department.findFirst({
+        where: { departmentName: { equals: deptName, mode: 'insensitive' } },
+      });
+      headName = dept?.headName || null;
+    }
+
+    // 3. Build array of dates in range
+    const datesInRange: string[] = [];
+    const dateObjectsInRange: { dateStr: string; timestamp: number }[] = [];
+    let curD = new Date(startD);
+    const maxD = new Date(endD);
+    while (curD <= maxD) {
+      const dd = String(curD.getDate()).padStart(2, '0');
+      const mm = String(curD.getMonth() + 1).padStart(2, '0');
+      const yyyy = curD.getFullYear();
+      const dateStr = `${dd}/${mm}/${yyyy}`;
+      datesInRange.push(dateStr);
+      dateObjectsInRange.push({
+        dateStr,
+        timestamp: getUtcMidnight(curD),
+      });
+      curD.setDate(curD.getDate() + 1);
+    }
+
+    // 4. Fetch all daily reports for this employee within the date range
+    const startEpoch = BigInt(startD.getTime());
+    const endEpoch = BigInt(endD.getTime());
+
+    const reports = await prisma.dailyReport.findMany({
+      where: {
+        AND: [
+          {
+            OR: [
+              { employeeId: trimmedEmpId },
+              { employee_id: trimmedEmpId },
+            ],
+          },
+          {
+            OR: [
+              {
+                dateTimestamp: {
+                  gte: startEpoch,
+                  lte: endEpoch,
+                },
+              },
+              { reportDate: { in: datesInRange } },
+              { date: { in: datesInRange } },
+            ],
+          },
+        ],
+      },
+      orderBy: {
+        dateTimestamp: 'asc',
+      },
+    });
+
+    // Build map of report by date
+    const reportMap = new Map<string, any>();
+    for (const r of reports) {
+      const dStr = r.reportDate || r.date || '';
+      if (dStr) {
+        reportMap.set(dStr.trim(), r);
+      }
+    }
+
+    // Now construct day-by-day records
+    let bodCount = 0;
+    let eodCount = 0;
+    let bothCount = 0;
+    let approvedCount = 0;
+    let autoApprovedCount = 0;
+    let pendingReviewCount = 0;
+    let missedCount = 0;
+    let sumScore = 0;
+    let scoreCount = 0;
+
+    const dailyRecords = dateObjectsInRange.map(({ dateStr, timestamp }) => {
+      const report = reportMap.get(dateStr);
+      const isPastDate = timestamp < getUtcMidnight(new Date());
+
+      if (!report) {
+        if (isPastDate) missedCount++;
+        return {
+          date: dateStr,
+          timestamp,
+          hasSubmission: false,
+          bodSubmitted: false,
+          eodSubmitted: false,
+          status: isPastDate ? 'Not Submitted' : 'Pending',
+          bodContent: null,
+          eodContent: null,
+          systemScore: null,
+          headRating: null,
+          finalScore: null,
+          approvalStatus: isPastDate ? 'Not Submitted' : 'Pending',
+          lastUpdated: null,
+        };
+      }
+
+      let bodData = report.bodData || (report as any).bod_data;
+      let eodData = report.eodData || (report as any).eod_data;
+
+      // Ensure parsed if JSON string
+      if (typeof bodData === 'string') {
+        try { bodData = JSON.parse(bodData); } catch {}
+      }
+      if (typeof eodData === 'string') {
+        try { eodData = JSON.parse(eodData); } catch {}
+      }
+
+      const bodFilled = !!(
+        bodData &&
+        (typeof bodData === 'object' ? Object.keys(bodData).length > 0 : String(bodData).trim() !== '' && bodData !== '{}')
+      );
+      const eodFilled = !!(
+        eodData &&
+        (typeof eodData === 'object' ? Object.keys(eodData).length > 0 : String(eodData).trim() !== '' && eodData !== '{}')
+      );
+
+      if (bodFilled) bodCount++;
+      if (eodFilled) eodCount++;
+      if (bodFilled && eodFilled) bothCount++;
+
+      let rawHeadRating: string | null = (report.headRating !== null && report.headRating !== undefined ? String(report.headRating).trim() : null) || (report.head_rating !== null && report.head_rating !== undefined ? String(report.head_rating).trim() : null);
+      let rawSysScore = report.systemScore ?? report.system_score ?? null;
+      let rawFinalScore = report.finalScore ?? report.final_score ?? null;
+      let rawApprovalStatus = report.approval_status ? String(report.approval_status).trim() : null;
+
+      const safeLastUpdated = parseSafeDate(report.lastUpdated || report.last_updated);
+      const hoursSinceUpdate = (Date.now() - safeLastUpdated.getTime()) / (1000 * 60 * 60);
+
+      let effectiveApprovalStatus: string = 'Not Submitted';
+      let effectiveHeadRating: string | null = rawHeadRating;
+      let effectiveFinalScore: number | null = rawFinalScore;
+
+      const isToday = timestamp >= getUtcMidnight(new Date());
+      const isAutoStatus = rawApprovalStatus === 'Auto Approved' ||
+                           rawApprovalStatus === 'Auto Approved (24h)' ||
+                           (typeof rawApprovalStatus === 'string' && rawApprovalStatus.startsWith('Auto Approved'));
+
+      if (eodFilled) {
+        if (!isToday && isAutoStatus) {
+          effectiveApprovalStatus = 'Auto Approved';
+          effectiveHeadRating = '100';
+          effectiveFinalScore = rawSysScore;
+          autoApprovedCount++;
+        } else if (rawApprovalStatus === 'Approved' || (!isAutoStatus && rawHeadRating && rawHeadRating !== '' && rawHeadRating !== 'Auto')) {
+          effectiveApprovalStatus = 'Approved';
+          effectiveHeadRating = rawHeadRating || '100';
+          effectiveFinalScore = rawFinalScore ?? (rawSysScore !== null && !isNaN(parseFloat(effectiveHeadRating))
+            ? Math.round((rawSysScore * parseFloat(effectiveHeadRating)) / 100)
+            : rawSysScore);
+          approvedCount++;
+        } else if (!isToday && (rawHeadRating === 'Auto' || hoursSinceUpdate >= 24)) {
+          effectiveApprovalStatus = 'Auto Approved';
+          effectiveHeadRating = '100';
+          effectiveFinalScore = rawSysScore;
+          autoApprovedCount++;
+        } else {
+          effectiveApprovalStatus = 'Pending Review';
+          effectiveHeadRating = null;
+          pendingReviewCount++;
+        }
+      } else {
+        if (bodFilled) {
+          effectiveApprovalStatus = (rawApprovalStatus === 'Pending EOD' || rawApprovalStatus === 'EOD Missed')
+            ? rawApprovalStatus
+            : (isPastDate ? 'EOD Missed' : 'Pending EOD');
+        } else {
+          effectiveApprovalStatus = isPastDate ? 'Not Submitted' : 'Pending';
+        }
+        effectiveHeadRating = null;
+        effectiveFinalScore = null;
+        if (isPastDate) missedCount++;
+      }
+
+      if (effectiveFinalScore !== null) {
+        sumScore += effectiveFinalScore;
+        scoreCount++;
+      } else if (rawSysScore !== null) {
+        sumScore += rawSysScore;
+        scoreCount++;
+      }
+
+      const status = bodFilled && eodFilled
+        ? 'Both'
+        : bodFilled
+        ? 'BOD Only'
+        : eodFilled
+        ? 'EOD Only (Missing BOD)'
+        : 'Not Submitted';
+
+      return {
+        date: dateStr,
+        timestamp,
+        hasSubmission: bodFilled || eodFilled,
+        bodSubmitted: bodFilled,
+        eodSubmitted: eodFilled,
+        status,
+        bodContent: bodData,
+        eodContent: eodData,
+        systemScore: rawSysScore,
+        headRating: effectiveHeadRating,
+        finalScore: effectiveFinalScore,
+        approvalStatus: effectiveApprovalStatus,
+        lastUpdated: report.lastUpdated || report.last_updated || null,
+      };
+    });
+
+    const avgScore = scoreCount > 0 ? Math.round((sumScore / scoreCount) * 10) / 10 : null;
+
+    return {
+      employee: {
+        id: trimmedEmpId,
+        name: employee?.name || 'Name Not Found',
+        department: employee?.department || deptName || 'General',
+        subDepartment: employee?.subDepartment || '',
+        role: employee?.role || 'employee',
+      },
+      headName: headName || 'Not Assigned',
+      dateRange: {
+        start,
+        end,
+        totalDays: dateObjectsInRange.length,
+      },
+      stats: {
+        totalDays: dateObjectsInRange.length,
+        submittedDays: dailyRecords.filter((d) => d.hasSubmission).length,
+        bothSubmittedDays: bothCount,
+        bodOnlyDays: bodCount - bothCount,
+        eodOnlyDays: eodCount - bothCount,
+        missedDays: missedCount,
+        approvedDays: approvedCount,
+        autoApprovedDays: autoApprovedCount,
+        pendingReviewDays: pendingReviewCount,
+        avgScore,
+      },
+      records: dailyRecords,
     };
   }
 }

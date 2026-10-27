@@ -219,18 +219,18 @@ async function runMigration() {
               bodData,
               eodData,
               systemScore: sysScore,
-              headRating: headRating || null,
+              headRating: headRating ? (parseFloat(headRating) || null) : null,
               finalScore,
-              lastUpdated,
+              lastUpdated: lastUpdated instanceof Date ? lastUpdated.toISOString() : String(lastUpdated || ''),
             },
             update: {
               departmentName: dept,
               bodData,
               eodData,
               systemScore: sysScore,
-              headRating: headRating || null,
+              headRating: headRating ? (parseFloat(headRating) || null) : null,
               finalScore,
-              lastUpdated,
+              lastUpdated: lastUpdated instanceof Date ? lastUpdated.toISOString() : String(lastUpdated || ''),
             },
           });
           report.dailyReports.imported++;

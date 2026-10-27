@@ -35,16 +35,15 @@
       "electron/**/*",
       "server/dist/**/*",
       "server/node_modules/**/*",
+      "server/node_modules/.prisma/**/*",
       "server/prisma/**/*",
       "server/.env",
       "client/dist/**/*"
     ],
     "asar": true,
     "asarUnpack": [
-      "server/node_modules/**/*",
-      "**/@prisma/**",
-      "**/.prisma/**",
-      "**/node_modules/.prisma/**"
+      "server/node_modules/@prisma/**/*",
+      "server/node_modules/.prisma/**/*"
     ],
     "win": {
       "target": [
@@ -64,6 +63,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "The Prime Classes - Branch Head"
+    },
+    "portable": {
+      "unpackDirName": false,
+      "requestExecutionLevel": "user"
     }
   },
   "keywords": [

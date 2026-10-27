@@ -84,6 +84,25 @@ export async function fetchSubmissionDetail(
   return apiRequest(`/tracker/submission-detail?${query.toString()}`);
 }
 
+export async function fetchActiveEmployees(): Promise<{
+  success: boolean;
+  data: import('../types/admin').ActiveEmployeeItem[];
+}> {
+  return apiRequest('/tracker/employees');
+}
+
+export async function fetchEmployeeBodEodReport(
+  empId: string,
+  start: string,
+  end: string
+): Promise<{
+  success: boolean;
+  data: import('../types/admin').EmployeeBodEodReportData;
+}> {
+  const query = new URLSearchParams({ empId, start, end });
+  return apiRequest(`/tracker/employee-report?${query.toString()}`);
+}
+
 // ─── TASK MANAGEMENT API ──────────────────────────────────────
 export async function fetchTaskDashboard(): Promise<{ success: boolean; data: any }> {
   return apiRequest('/tasks/dashboard');

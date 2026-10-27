@@ -10,6 +10,7 @@ interface DashboardControlsProps {
   onDownloadPDF: () => void;
   onOpenTracker?: () => void;
   onOpenTaskManager?: () => void;
+  onOpenEmployeeReport?: () => void;
   isLoading: boolean;
 }
 
@@ -20,6 +21,7 @@ export const DashboardControls: React.FC<DashboardControlsProps> = ({
   onDownloadPDF,
   onOpenTracker,
   onOpenTaskManager,
+  onOpenEmployeeReport,
   isLoading,
 }) => {
   const [customStart, setCustomStart] = useState(currentFilter.start || '');
@@ -128,6 +130,18 @@ export const DashboardControls: React.FC<DashboardControlsProps> = ({
               title="Open BOD/EOD Submission Compliance Tracker"
             >
               <span>📋 BOD/EOD Tracker</span>
+            </button>
+          )}
+
+          {/* Employee BOD/EOD Download button */}
+          {onOpenEmployeeReport && (
+            <button
+              onClick={onOpenEmployeeReport}
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all"
+              title="Download BOD/EOD dossier for any employee within filtered dates"
+            >
+              <FileDown className="w-4 h-4" />
+              <span>📥 Employee BOD/EOD</span>
             </button>
           )}
 

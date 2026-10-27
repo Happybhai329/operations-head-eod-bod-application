@@ -52,8 +52,8 @@ for (const p of envSearchPaths) {
 
 // Environment Defaults (Supabase Production Credentials)
 process.env.NODE_ENV = 'production';
-process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres.jgckdllcffnzacacqjzp:8x.3wcN%2FV9Q9Yvf@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres';
-process.env.DIRECT_URL = process.env.DIRECT_URL || 'postgresql://postgres.jgckdllcffnzacacqjzp:8x.3wcN%2FV9Q9Yvf@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres';
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres.vldsthccmlzxxlvothmp:yM2M7KNZvGPzapyj@aws-0-ap-south-1.pooler.supabase.com:5432/postgres';
+process.env.DIRECT_URL = process.env.DIRECT_URL || 'postgresql://postgres.vldsthccmlzxxlvothmp:yM2M7KNZvGPzapyj@aws-0-ap-south-1.pooler.supabase.com:5432/postgres';
 process.env.SUPER_ADMIN_CODE = process.env.SUPER_ADMIN_CODE || 'TPC-SUPER-2026';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'the-prime-classes-super-secret-jwt-key-2026-branch-head';
 process.env.MASTER_DB_SPREADSHEET_ID = process.env.MASTER_DB_SPREADSHEET_ID || '1AxdiOpaij8Lnx0TV5iMhgVlADfN0LeXzwOdmbzmrlGA';
@@ -135,6 +135,21 @@ process.on('unhandledRejection', (reason) => {
 function startBackendServer(port) {
   try {
     process.env.PORT = String(port);
+
+    // Explicitly locate unpacked Prisma query engine library for bulletproof loading
+    const possibleEnginePaths = [
+      path.join(process.resourcesPath || '', 'app.asar.unpacked/server/node_modules/.prisma/client/query_engine-windows.dll.node'),
+      path.join(process.resourcesPath || '', 'server/node_modules/.prisma/client/query_engine-windows.dll.node'),
+      path.join(__dirname, '../server/node_modules/.prisma/client/query_engine-windows.dll.node'),
+    ];
+    for (const p of possibleEnginePaths) {
+      if (fs.existsSync(p)) {
+        process.env.PRISMA_QUERY_ENGINE_LIBRARY = p;
+        log('[Electron] Resolved PRISMA_QUERY_ENGINE_LIBRARY to:', p);
+        break;
+      }
+    }
+
     const potentialPaths = [
       path.join(__dirname, '../server/dist/index.js'),
       path.join(process.resourcesPath || '', 'app.asar.unpacked/server/dist/index.js'),

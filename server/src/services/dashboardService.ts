@@ -167,8 +167,8 @@ export class DashboardService {
       }
 
       // Fallback head rating resolution
-      let effectiveHeadRating = report.headRating;
-      if (!effectiveHeadRating || effectiveHeadRating.trim() === '') {
+      let effectiveHeadRating = report.headRating !== null && report.headRating !== undefined ? String(report.headRating).trim() : '';
+      if (!effectiveHeadRating || effectiveHeadRating === '') {
         if (report.head_rating !== null && report.head_rating !== undefined && String(report.head_rating).trim() !== '') {
           effectiveHeadRating = String(report.head_rating).trim();
         } else if (report.approval_status === 'Auto Approved' || report.approval_status === 'Auto Approved (24h)' || (typeof report.approval_status === 'string' && report.approval_status.startsWith('Auto Approved'))) {

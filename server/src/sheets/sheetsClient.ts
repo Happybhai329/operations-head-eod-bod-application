@@ -508,7 +508,7 @@ export class GoogleSheetsClient {
       eodStr,
       report.systemScore != null ? report.systemScore : '',
       report.lastUpdated || new Date().toISOString(),
-      report.headRating || '',
+      report.headRating != null ? String(report.headRating) : '',
       report.finalScore != null ? report.finalScore : '',
     ];
 

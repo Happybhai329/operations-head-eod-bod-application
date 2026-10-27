@@ -166,17 +166,17 @@ async function seed() {
           bodData,
           eodData,
           systemScore: sysScore,
-          headRating: headRating || null,
+          headRating: headRating ? (parseFloat(headRating) || null) : null,
           finalScore: finalScore,
-          lastUpdated: reportDateObj,
+          lastUpdated: reportDateObj.toISOString(),
         },
         update: {
           systemScore: sysScore,
-          headRating: headRating || null,
+          headRating: headRating ? (parseFloat(headRating) || null) : null,
           finalScore: finalScore,
           bodData,
           eodData,
-          lastUpdated: reportDateObj,
+          lastUpdated: reportDateObj.toISOString(),
         },
       });
 

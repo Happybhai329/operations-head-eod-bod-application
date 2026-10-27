@@ -158,8 +158,8 @@ export class SheetsInboundSync {
           try {
             await prisma.department.upsert({
               where: { departmentName: deptName },
-              create: { departmentId: deptId, departmentName: deptName, headId, headName, parentDepartment: parentDept },
-              update: { departmentId: deptId, headId, headName, parentDepartment: parentDept },
+              create: { departmentId: deptId, departmentName: deptName, name: deptName, headId, headName, parentDepartment: parentDept },
+              update: { departmentId: deptId, name: deptName, headId, headName, parentDepartment: parentDept },
             });
             count++;
           } catch (_) {}
@@ -448,9 +448,9 @@ export class SheetsInboundSync {
                 bodData: finalBodData,
                 eodData: finalEodData,
                 systemScore: finalSystemScore,
-                headRating: finalHeadRating,
+                headRating: finalHeadRatingNum,
                 finalScore: finalFinalScore,
-                lastUpdated: rec.lastUpdated,
+                lastUpdated: rec.lastUpdatedStr,
                 // snake_case columns for full parity with employee app & PostgreSQL
                 date: rec.reportDate,
                 employee_id: rec.empId,
@@ -470,9 +470,9 @@ export class SheetsInboundSync {
                 bodData: finalBodData,
                 eodData: finalEodData,
                 systemScore: finalSystemScore,
-                headRating: finalHeadRating,
+                headRating: finalHeadRatingNum,
                 finalScore: finalFinalScore,
-                lastUpdated: rec.lastUpdated,
+                lastUpdated: rec.lastUpdatedStr,
                 // snake_case columns
                 date: rec.reportDate,
                 employee_id: rec.empId,

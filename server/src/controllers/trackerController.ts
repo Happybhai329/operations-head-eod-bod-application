@@ -41,4 +41,41 @@ export class TrackerController {
       next(err);
     }
   }
+
+  public static async getEmployeeList(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await TrackerService.fetchActiveEmployeesList();
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  public static async getEmployeeReport(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { empId, start, end } = req.query;
+      if (!empId || !start || !end) {
+        return res.status(400).json({
+          success: false,
+          message: 'Employee ID (empId), start date (start), and end date (end) are required.',
+        });
+      }
+
+      const data = await TrackerService.fetchEmployeeBodEodReport(
+        String(empId),
+        String(start),
+        String(end)
+      );
+
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (err: any) {
+      next(err);
+    }
+  }
 }

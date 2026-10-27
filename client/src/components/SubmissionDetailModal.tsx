@@ -1,6 +1,7 @@
-import React from 'react';
-import { X, Calendar, User, Building2, CheckCircle, XCircle, CheckCircle2, Clock, AlertCircle, Layers } from 'lucide-react';
-import { SubmissionDetail } from '../types/admin';
+import React, { useState } from 'react';
+import { X, Calendar, User, Building2, CheckCircle, XCircle, CheckCircle2, Clock, AlertCircle, Layers, Download } from 'lucide-react';
+import { SubmissionDetail, EmployeeBodEodReportData } from '../types/admin';
+import { exportEmployeeBodEodToPDF } from '../utils/employeeBodEodExport';
 
 interface SubmissionDetailModalProps {
   isOpen: boolean;
@@ -15,7 +16,64 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
   detail,
   isLoading,
 }) => {
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleDownloadDayPdf = async () => {
+    if (!detail) return;
+    try {
+      setIsDownloadingPdf(true);
+      const singleDayData: EmployeeBodEodReportData = {
+        employee: {
+          id: detail.empId,
+          name: detail.empName,
+          department: detail.dept,
+          role: 'Staff',
+        },
+        headName: detail.headName || 'Not Assigned',
+        dateRange: {
+          start: detail.date,
+          end: detail.date,
+          totalDays: 1,
+        },
+        stats: {
+          totalDays: 1,
+          submittedDays: 1,
+          bothSubmittedDays: 1,
+          bodOnlyDays: 0,
+          eodOnlyDays: 0,
+          missedDays: 0,
+          approvedDays: detail.approvalStatus === 'Approved' ? 1 : 0,
+          autoApprovedDays: detail.approvalStatus === 'Auto Approved' ? 1 : 0,
+          pendingReviewDays: detail.approvalStatus === 'Pending Review' ? 1 : 0,
+          avgScore: detail.finalScore ?? detail.systemScore ?? null,
+        },
+        records: [
+          {
+            date: detail.date,
+            timestamp: Date.now(),
+            hasSubmission: true,
+            bodSubmitted: !!detail.bodContent,
+            eodSubmitted: !!detail.eodContent,
+            status: 'Both',
+            bodContent: detail.bodContent,
+            eodContent: detail.eodContent,
+            systemScore: detail.systemScore,
+            headRating: detail.headRating,
+            finalScore: detail.finalScore,
+            approvalStatus: detail.approvalStatus || 'Pending Review',
+            lastUpdated: detail.updatedAt,
+          },
+        ],
+      };
+      await exportEmployeeBodEodToPDF(singleDayData);
+    } catch (err: any) {
+      alert('Failed to generate PDF: ' + (err.message || 'Unknown error'));
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   const renderTaskSection = (data: any, title: string, badgeBg: string, badgeText: string) => {
     if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
@@ -272,12 +330,23 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleDownloadDayPdf}
+              disabled={!detail || isDownloadingPdf}
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors disabled:opacity-50"
+              title="Download this day's BOD/EOD submission as PDF"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>{isDownloadingPdf ? 'Generating...' : 'Download PDF'}</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}

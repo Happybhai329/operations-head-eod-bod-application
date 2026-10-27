@@ -9,14 +9,15 @@ datasource db {
 }
 
 model Department {
-  id               String        @id @default(uuid())
+  id               Int           @id @default(autoincrement())
   departmentId     String        @unique
   departmentName   String        @unique
+  name             String        @default("") @map("name")
   headId           String?
   headName         String?
   parentDepartment String?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  createdAt        DateTime?     @default(now())
+  updatedAt        DateTime?     @updatedAt
 
   employees        Employee[]
   dailyReports     DailyReport[]
@@ -35,8 +36,8 @@ model Employee {
   role           String        @default("employee")
   contact        String?
   joiningDate    DateTime?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  createdAt      DateTime?     @default(now())
+  updatedAt      DateTime?     @updatedAt
 
   departmentRel  Department?   @relation(fields: [department], references: [departmentName], onDelete: SetNull)
   dailyReports   DailyReport[]
@@ -53,11 +54,11 @@ model DailyReport {
   bodData             Json?       @default("{}")
   eodData             Json?       @default("{}")
   systemScore         Float?
-  headRating          String?     // e.g. "100", "90", "Auto"
+  headRating          Float?
   finalScore          Float?
-  lastUpdated         DateTime    @default(now())
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  lastUpdated         String?     @default("")
+  createdAt           DateTime?   @default(now())
+  updatedAt           DateTime?   @updatedAt
 
   // Snake_case column mappings for full parity with employee app & PostgreSQL schema
   date                String?     @map("date")
@@ -92,8 +93,8 @@ model HeadRating {
   baseScore      Float       @default(0)
   adminRating    Float       @default(100) // Multiplier %: e.g. 100, 110, 85
   finalHeadScore Float       @default(0)
-  updatedAt      DateTime    @updatedAt
-  createdAt      DateTime    @default(now())
+  updatedAt      DateTime?   @updatedAt
+  createdAt      DateTime?   @default(now())
 
   departmentRel  Department? @relation(fields: [departmentName], references: [departmentName], onDelete: Cascade)
 
@@ -115,8 +116,8 @@ model SyncJob {
   lastAttemptAt DateTime?
   nextAttemptAt DateTime?
   error         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime? @default(now())
+  updatedAt     DateTime? @updatedAt
 
   @@index([status, nextAttemptAt])
   @@index([entityType, entityId])

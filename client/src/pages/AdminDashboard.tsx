@@ -8,6 +8,7 @@ import { DepartmentGrid } from '../components/DepartmentGrid';
 import { DepartmentScrutinyModal } from '../components/DepartmentScrutinyModal';
 import { SubmissionTrackerModal } from '../components/SubmissionTrackerModal';
 import { TaskManagerModal } from '../components/TaskManagerModal';
+import { EmployeeBodEodDownloadModal } from '../components/EmployeeBodEodDownloadModal';
 import { exportDashboardToPDF } from '../utils/pdfExport';
 
 export const AdminDashboard: React.FC = () => {
@@ -22,6 +23,7 @@ export const AdminDashboard: React.FC = () => {
   // New Modals state (eod and bod head parity)
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [isTaskManagerOpen, setIsTaskManagerOpen] = useState(false);
+  const [isEmployeeReportModalOpen, setIsEmployeeReportModalOpen] = useState(false);
 
   const loadData = async (currentFilter: FilterParams = filter) => {
     try {
@@ -86,6 +88,7 @@ export const AdminDashboard: React.FC = () => {
         onDownloadPDF={handleDownloadPDF}
         onOpenTracker={() => setIsTrackerOpen(true)}
         onOpenTaskManager={() => setIsTaskManagerOpen(true)}
+        onOpenEmployeeReport={() => setIsEmployeeReportModalOpen(true)}
         isLoading={isLoading}
       />
 
@@ -136,6 +139,14 @@ export const AdminDashboard: React.FC = () => {
       <TaskManagerModal
         isOpen={isTaskManagerOpen}
         onClose={() => setIsTaskManagerOpen(false)}
+      />
+
+      {/* 6. EMPLOYEE BOD/EOD DOWNLOAD DOSSIER MODAL */}
+      <EmployeeBodEodDownloadModal
+        isOpen={isEmployeeReportModalOpen}
+        onClose={() => setIsEmployeeReportModalOpen(false)}
+        initialStartDate={filter.start}
+        initialEndDate={filter.end}
       />
     </div>
   );
