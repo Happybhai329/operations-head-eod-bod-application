@@ -37,32 +37,33 @@ export const RawTaskReportModal: React.FC<RawTaskReportModalProps> = ({
   const eodKeys = Object.keys(parsedEod);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-[#F4F7F6] rounded-2xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-2 lg:p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-[#F4F7F6] rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-slate-200 w-full max-w-full sm:max-w-5xl h-full sm:max-h-[90vh] flex flex-col overflow-hidden">
         {/* Modal Header */}
-        <div className="bg-[#041C32] text-white px-6 py-4 flex items-center justify-between border-b border-slate-700">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-[#F5D042] text-[#041C32] rounded-lg">
-              <FileText className="w-5 h-5" />
+        <div className="bg-[#041C32] text-white px-3.5 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between border-b border-slate-700 gap-2 shrink-0">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+            <div className="p-1.5 sm:p-2 bg-[#F5D042] text-[#041C32] rounded-lg shrink-0">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h3 className="font-extrabold text-base sm:text-lg text-white">
-                👁️ Employee Task Report: <span className="text-[#F5D042]">{employeeName}</span>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-extrabold text-sm sm:text-lg text-white truncate">
+                👁️ Tasks: <span className="text-[#F5D042]">{employeeName}</span>
               </h3>
-              <p className="text-xs text-slate-300 font-mono">Employee ID: {employeeId}</p>
+              <p className="text-[11px] text-slate-300 font-mono truncate">Employee ID: {employeeId}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors shrink-0"
+            title="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body - 2 Columns */}
-        <div className="p-6 overflow-y-auto flex-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-3.5 sm:p-6 overflow-y-auto flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* 1. MORNING TARGET (BOD) COLUMN */}
             <div className="bg-white rounded-xl p-5 shadow-sm border border-indigo-200 flex flex-col">
               <div className="flex items-center space-x-2 border-b border-indigo-100 pb-3 mb-4">

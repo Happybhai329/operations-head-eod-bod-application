@@ -295,37 +295,38 @@ export const SubmissionTrackerModal: React.FC<SubmissionTrackerModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex items-center justify-center p-2 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-fadeIn">
-        <div className="bg-[#F4F7F6] rounded-2xl shadow-2xl border border-slate-200 w-full max-w-[96vw] xl:max-w-7xl max-h-[96vh] flex flex-col overflow-hidden">
+      <div className="fixed inset-0 z-40 flex items-center justify-center p-0 sm:p-2 lg:p-4 bg-slate-950/75 backdrop-blur-sm animate-fadeIn">
+        <div className="bg-[#F4F7F6] rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-slate-200 w-full max-w-full sm:max-w-[96vw] xl:max-w-7xl h-full sm:max-h-[96vh] flex flex-col overflow-hidden">
           
           {/* Header */}
-          <div className="bg-[#041C32] text-white px-6 py-3.5 flex items-center justify-between border-b border-slate-700">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-[#F5D042] text-[#041C32] rounded-xl shadow-sm">
-                <Calendar className="w-5 h-5" />
+          <div className="bg-[#041C32] text-white px-3.5 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between border-b border-slate-700 gap-2 shrink-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+              <div className="p-1.5 sm:p-2 bg-[#F5D042] text-[#041C32] rounded-xl shadow-2xs shrink-0">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h3 className="font-extrabold text-base sm:text-xl text-white tracking-tight">
-                  📋 BOD / EOD <span className="text-[#F5D042]">Submission Compliance & Ratings Tracker</span>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-extrabold text-xs sm:text-base lg:text-xl text-white tracking-tight truncate">
+                  📋 BOD / EOD <span className="text-[#F5D042]">Submission Compliance</span>
                 </h3>
-                <p className="text-xs text-slate-300">
+                <p className="text-[11px] text-slate-300 hidden sm:block truncate">
                   Real-time analytics for Employee Morning & Evening Work Submissions, Branch Head Ratings, and Auto-Approvals
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
               <button
                 onClick={() => loadTracker(true)}
                 disabled={isLoading}
                 title="Sync Live with Google Sheets & Supabase"
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-[#041C32] bg-[#F5D042] hover:bg-yellow-400 transition-colors shadow-sm disabled:opacity-50"
+                className="flex items-center space-x-1 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold text-[#041C32] bg-[#F5D042] hover:bg-yellow-400 active:bg-yellow-500 transition-colors shadow-2xs disabled:opacity-50 min-h-[34px]"
               >
                 <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
                 <span>Sync Live</span>
               </button>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors"
+                title="Close Tracker"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -333,11 +334,11 @@ export const SubmissionTrackerModal: React.FC<SubmissionTrackerModalProps> = ({
           </div>
 
           {/* Filter Bar */}
-          <div className="bg-white px-6 py-3 border-b border-slate-200 space-y-2.5">
+          <div className="bg-white px-3 sm:px-6 py-2.5 sm:py-3 border-b border-slate-200 space-y-2.5 shrink-0">
             {/* Presets */}
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-xs font-bold text-slate-500 mr-1">Presets:</span>
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+                <span className="text-[11px] sm:text-xs font-bold text-slate-500 shrink-0">Presets:</span>
                 {[
                   { id: 'Today', label: 'Today' },
                   { id: 'Yesterday', label: 'Yesterday' },
@@ -349,7 +350,7 @@ export const SubmissionTrackerModal: React.FC<SubmissionTrackerModalProps> = ({
                   <button
                     key={p.id}
                     onClick={() => handleApplyPreset(p.id)}
-                    className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all ${
+                    className={`px-2.5 py-1 text-xs font-bold rounded-md shrink-0 whitespace-nowrap transition-all ${
                       activePreset === p.id
                         ? 'bg-[#041C32] text-[#F5D042] shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -361,7 +362,7 @@ export const SubmissionTrackerModal: React.FC<SubmissionTrackerModalProps> = ({
               </div>
 
               {/* View Switcher Tabs */}
-              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-2 sm:flex sm:items-center bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto mt-2 sm:mt-0">
                 <button
                   onClick={() => {
                     setActiveTab('compliance');
@@ -399,8 +400,8 @@ export const SubmissionTrackerModal: React.FC<SubmissionTrackerModalProps> = ({
             </div>
 
             {/* Date Inputs & Department Filter */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-              <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 pt-1">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 text-xs w-full lg:w-auto">
                 <div className="flex items-center space-x-1 bg-slate-50 border border-slate-200 rounded-lg p-1">
                   <span className="text-slate-400 px-1 font-semibold">From:</span>
                   <input
@@ -450,7 +451,7 @@ export const SubmissionTrackerModal: React.FC<SubmissionTrackerModalProps> = ({
                 </button>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full lg:w-auto">
                 <button
                   onClick={() => handleOpenDownloadModal()}
                   className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs flex items-center space-x-1.5 shadow-sm transition-all"
@@ -473,7 +474,7 @@ export const SubmissionTrackerModal: React.FC<SubmissionTrackerModalProps> = ({
           </div>
 
           {/* Modal Content */}
-          <div className="p-5 overflow-y-auto flex-1 space-y-4">
+          <div className="p-3 sm:p-5 overflow-y-auto flex-1 space-y-3 sm:space-y-4">
             {isLoading ? (
               <div className="text-center py-20 space-y-3">
                 <div className="w-8 h-8 border-4 border-[#041C32] border-t-[#F5D042] rounded-full animate-spin mx-auto"></div>

@@ -214,34 +214,35 @@ export const EmployeeBodEodDownloadModal: React.FC<EmployeeBodEodDownloadModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-[#F8FAFC] rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-[#F8FAFC] rounded-xl sm:rounded-2xl shadow-2xl border-0 sm:border border-slate-200 w-full max-w-full sm:max-w-3xl h-full sm:max-h-[92vh] flex flex-col overflow-hidden">
         
         {/* Header */}
-        <div className="bg-[#041C32] text-white px-6 py-4 flex items-center justify-between border-b border-slate-700">
-          <div className="flex items-center space-x-3">
-            <div className="p-2.5 bg-[#F5D042] text-[#041C32] rounded-xl shadow-sm">
-              <Download className="w-5 h-5" />
+        <div className="bg-[#041C32] text-white px-3.5 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between border-b border-slate-700 gap-2 shrink-0">
+          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0 flex-1">
+            <div className="p-2 bg-[#F5D042] text-[#041C32] rounded-xl shadow-2xs shrink-0">
+              <Download className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h3 className="font-extrabold text-lg text-white tracking-tight flex items-center gap-2">
-                Download Employee BOD / EOD Dossier
+            <div className="min-w-0 flex-1">
+              <h3 className="font-extrabold text-sm sm:text-lg text-white tracking-tight truncate">
+                Download Employee BOD / EOD
               </h3>
-              <p className="text-xs text-slate-300">
+              <p className="text-[11px] text-slate-300 hidden sm:block truncate">
                 Export complete daily targets, achievements, checkboxes, and remarks across filtered dates
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
+            title="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto space-y-5">
+        <div className="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 flex-1">
           
           {/* Step 1: Employee Selection */}
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-2">
@@ -329,7 +330,7 @@ export const EmployeeBodEodDownloadModal: React.FC<EmployeeBodEodDownloadModalPr
             </label>
 
             {/* Quick Presets */}
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
               {[
                 { id: 'today', label: 'Today' },
                 { id: 'yesterday', label: 'Yesterday' },
@@ -455,16 +456,17 @@ export const EmployeeBodEodDownloadModal: React.FC<EmployeeBodEodDownloadModalPr
         </div>
 
         {/* Footer / Actions */}
-        <div className="bg-slate-100 px-6 py-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="text-xs text-slate-500">
-            Selected: <strong className="text-slate-800">{selectedEmployeeObj?.name || selectedEmpId}</strong> ({startDate} to {endDate})
+        <div className="bg-slate-100 px-3.5 sm:px-6 py-3 sm:py-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shrink-0">
+          <div className="text-xs text-slate-600 truncate">
+            Selected: <strong className="text-slate-900">{selectedEmployeeObj?.name || selectedEmpId}</strong>
+            <span className="text-slate-400 ml-1">({startDate} to {endDate})</span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             <button
               onClick={onClose}
               type="button"
-              className="px-4 py-2 rounded-lg text-xs font-bold bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 transition-colors"
+              className="px-3 py-2 rounded-lg text-xs font-bold bg-white hover:bg-slate-200 active:bg-slate-300 text-slate-700 border border-slate-300 transition-colors min-h-[40px] text-center"
             >
               Cancel
             </button>
@@ -473,20 +475,20 @@ export const EmployeeBodEodDownloadModal: React.FC<EmployeeBodEodDownloadModalPr
               onClick={handleDownloadCSV}
               disabled={!previewData || isGeneratingCsv}
               type="button"
-              className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all flex items-center space-x-1.5 disabled:opacity-50"
+              className="px-3 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-2xs transition-all flex items-center justify-center space-x-1 disabled:opacity-50 min-h-[40px] text-center"
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>{isGeneratingCsv ? 'Exporting CSV...' : 'Export CSV (Excel)'}</span>
+              <FileSpreadsheet className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{isGeneratingCsv ? 'Exporting...' : 'Excel CSV'}</span>
             </button>
 
             <button
               onClick={handleDownloadPDF}
               disabled={!previewData || isGeneratingPdf}
               type="button"
-              className="px-4 py-2 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-all flex items-center space-x-1.5 disabled:opacity-50"
+              className="px-3 py-2 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white shadow-2xs transition-all flex items-center justify-center space-x-1 disabled:opacity-50 min-h-[40px] text-center"
             >
-              <FileText className="w-4 h-4" />
-              <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download PDF Dossier'}</span>
+              <FileText className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{isGeneratingPdf ? 'Building...' : 'PDF Dossier'}</span>
             </button>
           </div>
         </div>

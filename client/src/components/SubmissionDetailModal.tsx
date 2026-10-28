@@ -302,27 +302,27 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-[#F4F7F6] rounded-2xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-2 lg:p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-[#F4F7F6] rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-slate-200 w-full max-w-full sm:max-w-5xl h-full sm:max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-[#041C32] text-white px-6 py-4 flex items-center justify-between border-b border-slate-700">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-[#F5D042] text-[#041C32] rounded-lg">
-              <CheckCircle2 className="w-5 h-5" />
+        <div className="bg-[#041C32] text-white px-3.5 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between border-b border-slate-700 gap-2 shrink-0">
+          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0 flex-1">
+            <div className="p-1.5 sm:p-2 bg-[#F5D042] text-[#041C32] rounded-lg shrink-0">
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h3 className="font-extrabold text-base sm:text-xl text-white flex items-center gap-2">
-                <span>👁 Submission Detail:</span>
-                <span className="text-[#F5D042]">{detail?.empName || 'Loading...'}</span>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-extrabold text-sm sm:text-xl text-white flex items-center gap-1.5 truncate">
+                <span className="hidden xs:inline">👁 Submission:</span>
+                <span className="text-[#F5D042] truncate">{detail?.empName || 'Loading...'}</span>
               </h3>
-              <p className="text-xs text-slate-300 flex items-center gap-3">
+              <p className="text-[11px] text-slate-300 flex flex-wrap items-center gap-x-2 gap-y-0.5 truncate">
                 <span>ID: <span className="font-mono text-white">{detail?.empId}</span></span>
                 <span>•</span>
                 <span>Dept: <span className="text-white">{detail?.dept}</span></span>
                 {detail?.headName && (
                   <>
                     <span>•</span>
-                    <span>Head: <span className="text-[#F5D042] font-semibold">{detail.headName}</span></span>
+                    <span className="truncate">Head: <span className="text-[#F5D042] font-semibold">{detail.headName}</span></span>
                   </>
                 )}
                 <span>•</span>
@@ -330,19 +330,20 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
             <button
               onClick={handleDownloadDayPdf}
               disabled={!detail || isDownloadingPdf}
-              className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors disabled:opacity-50"
+              className="flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-lg text-xs font-bold shadow-2xs transition-colors disabled:opacity-50 min-h-[34px]"
               title="Download this day's BOD/EOD submission as PDF"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>{isDownloadingPdf ? 'Generating...' : 'Download PDF'}</span>
+              <Download className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{isDownloadingPdf ? 'PDF...' : 'Day PDF'}</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors shrink-0"
+              title="Close"
             >
               <X className="w-5 h-5" />
             </button>
@@ -350,7 +351,7 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-6">
+        <div className="p-3.5 sm:p-6 overflow-y-auto flex-1 space-y-4 sm:space-y-6">
           {isLoading ? (
             <div className="text-center py-20 space-y-3">
               <div className="w-8 h-8 border-4 border-[#041C32] border-t-[#F5D042] rounded-full animate-spin mx-auto"></div>
@@ -388,10 +389,10 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="bg-white px-6 py-3 border-t border-slate-200 flex justify-end">
+        <div className="bg-white px-3.5 sm:px-6 py-2.5 sm:py-3 border-t border-slate-200 flex justify-end shrink-0">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-lg transition-colors"
+            className="w-full sm:w-auto px-5 py-2 bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white font-bold text-xs rounded-lg transition-colors min-h-[38px]"
           >
             Close
           </button>

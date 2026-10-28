@@ -28,10 +28,10 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F7F6] text-slate-800 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F4F7F6] text-slate-800 flex flex-col font-sans pb-safe">
       <Navbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
 
-      <main className="flex-1">
+      <main className="flex-1 w-full overflow-x-hidden">
         {!isAuthenticated ? (
           <AdminLogin onLoginSuccess={handleLoginSuccess} />
         ) : (
@@ -39,8 +39,8 @@ export function App() {
         )}
       </main>
 
-      <footer className="py-4 border-t border-slate-200 text-center text-xs text-slate-400 bg-white">
-        © {new Date().getFullYear()} The Prime Classes • Super Admin & Branch Head Performance Architecture
+      <footer className="py-3 sm:py-4 px-4 border-t border-slate-200 text-center text-[10px] sm:text-xs text-slate-400 bg-white">
+        © {new Date().getFullYear()} The Prime Classes • Super Admin & Branch Head Portal
       </footer>
     </div>
   );

@@ -264,7 +264,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/75 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-[#F4F7F6] rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
+      <div className="bg-[#F4F7F6] rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-slate-200 w-full max-w-full sm:max-w-4xl h-full sm:max-h-[92vh] flex flex-col overflow-hidden">
         
         {/* Header */}
         <div className="bg-[#041C32] text-white px-6 py-3.5 flex items-center justify-between border-b border-slate-700">

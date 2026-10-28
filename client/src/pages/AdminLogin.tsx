@@ -36,11 +36,11 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 sm:p-10 w-full max-w-md text-center transition-all hover:shadow-2xl">
+    <div className="min-h-[85vh] flex items-center justify-center px-3 sm:px-4 py-6">
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 sm:p-10 w-full max-w-md text-center transition-all hover:shadow-2xl">
         {/* Brand Icon */}
-        <div className="w-16 h-16 bg-[#041C32] text-[#F5D042] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md">
-          <KeyRound className="w-8 h-8" />
+        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#041C32] text-[#F5D042] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md">
+          <KeyRound className="w-7 h-7 sm:w-8 sm:h-8" />
         </div>
 
         <h2 className="text-xl sm:text-2xl font-extrabold text-[#041C32] tracking-tight">
@@ -57,7 +57,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
               value={securityCode}
               onChange={(e) => setSecurityCode(e.target.value)}
               placeholder="Enter Security Code"
-              className="w-full text-center text-base sm:text-lg font-bold bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-800 tracking-wider placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#041C32] focus:bg-white transition-all"
+              className="w-full text-center text-base sm:text-lg font-bold bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 sm:py-3.5 text-slate-800 tracking-wider placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#041C32] focus:bg-white transition-all shadow-inner"
               autoFocus
             />
           </div>
@@ -65,7 +65,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-[#F5D042] text-[#041C32] font-black text-base rounded-xl hover:bg-[#e3be30] shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center space-x-2"
+            className="w-full min-h-[48px] py-3 px-4 bg-[#F5D042] text-[#041C32] font-black text-sm sm:text-base rounded-xl hover:bg-[#e3be30] active:scale-[0.99] shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center space-x-2"
           >
             {isLoading ? (
               <span>Verifying Access...</span>

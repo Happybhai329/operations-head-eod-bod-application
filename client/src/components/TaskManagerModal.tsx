@@ -317,36 +317,37 @@ export const TaskManagerModal: React.FC<TaskManagerModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
-        <div className="bg-[#F4F7F6] rounded-2xl shadow-2xl border border-slate-200 w-full max-w-7xl max-h-[94vh] flex flex-col overflow-hidden">
+      <div className="fixed inset-0 z-40 flex items-center justify-center p-0 sm:p-2 lg:p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+        <div className="bg-[#F4F7F6] rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-slate-200 w-full max-w-full sm:max-w-7xl h-full sm:max-h-[94vh] flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="bg-[#041C32] text-white px-6 py-4 flex items-center justify-between border-b border-slate-700">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-[#F5D042] text-[#041C32] rounded-lg">
-                <ListTodo className="w-5 h-5" />
+          <div className="bg-[#041C32] text-white px-3.5 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between border-b border-slate-700 gap-2 shrink-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+              <div className="p-1.5 sm:p-2 bg-[#F5D042] text-[#041C32] rounded-lg shrink-0">
+                <ListTodo className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <h3 className="font-extrabold text-base sm:text-xl text-white">
-                  📝 Task <span className="text-[#F5D042]">Manager & Checklists</span>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-extrabold text-xs sm:text-base lg:text-xl text-white truncate">
+                  📝 Task <span className="text-[#F5D042]">Manager</span>
                 </h3>
-                <p className="text-xs text-slate-300">
+                <p className="text-[11px] text-slate-300 hidden sm:block truncate">
                   Assign, track, and scrutinize branch tasks across departments
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
               <button
                 onClick={() => loadData(true)}
                 disabled={isLoading}
                 title="Sync Live with Google Sheets & Supabase"
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#041C32] bg-[#F5D042] hover:bg-yellow-400 transition-colors shadow-sm disabled:opacity-50"
+                className="flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold text-[#041C32] bg-[#F5D042] hover:bg-yellow-400 active:bg-yellow-500 transition-colors shadow-2xs disabled:opacity-50 min-h-[34px]"
               >
                 <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
                 <span>Sync Live</span>
               </button>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors shrink-0"
+                title="Close"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -354,10 +355,10 @@ export const TaskManagerModal: React.FC<TaskManagerModalProps> = ({
           </div>
 
           {/* Tab Navigation */}
-          <div className="bg-white px-6 border-b border-slate-200 flex items-center space-x-4">
+          <div className="bg-white px-3 sm:px-6 border-b border-slate-200 flex items-center space-x-2 sm:space-x-4 overflow-x-auto no-scrollbar shrink-0">
             <button
               onClick={() => setActiveTab('list')}
-              className={`py-3.5 px-2 text-xs sm:text-sm font-bold border-b-2 flex items-center space-x-1.5 transition-all ${
+              className={`py-2.5 sm:py-3.5 px-2.5 text-xs sm:text-sm font-bold border-b-2 flex items-center space-x-1.5 whitespace-nowrap shrink-0 transition-all ${
                 activeTab === 'list'
                   ? 'border-[#041C32] text-[#041C32]'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -368,7 +369,7 @@ export const TaskManagerModal: React.FC<TaskManagerModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('assign')}
-              className={`py-3.5 px-2 text-xs sm:text-sm font-bold border-b-2 flex items-center space-x-1.5 transition-all ${
+              className={`py-2.5 sm:py-3.5 px-2.5 text-xs sm:text-sm font-bold border-b-2 flex items-center space-x-1.5 whitespace-nowrap shrink-0 transition-all ${
                 activeTab === 'assign'
                   ? 'border-[#041C32] text-[#041C32]'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -379,7 +380,7 @@ export const TaskManagerModal: React.FC<TaskManagerModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`py-3.5 px-2 text-xs sm:text-sm font-bold border-b-2 flex items-center space-x-1.5 transition-all ${
+              className={`py-2.5 sm:py-3.5 px-2.5 text-xs sm:text-sm font-bold border-b-2 flex items-center space-x-1.5 whitespace-nowrap shrink-0 transition-all ${
                 activeTab === 'analytics'
                   ? 'border-[#041C32] text-[#041C32]'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -391,7 +392,7 @@ export const TaskManagerModal: React.FC<TaskManagerModalProps> = ({
           </div>
 
           {/* Tab Content */}
-          <div className="p-6 overflow-y-auto flex-1 space-y-6">
+          <div className="p-3 sm:p-6 overflow-y-auto flex-1 space-y-4 sm:space-y-6">
             {isLoading && !dashboardData ? (
               <div className="text-center py-20 space-y-3">
                 <div className="w-8 h-8 border-4 border-[#041C32] border-t-[#F5D042] rounded-full animate-spin mx-auto"></div>
@@ -403,7 +404,7 @@ export const TaskManagerModal: React.FC<TaskManagerModalProps> = ({
                 {activeTab === 'list' && (
                   <div className="space-y-4">
                     {/* Filter Bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2.5 sm:p-3.5 rounded-xl border border-slate-200 shadow-2xs">
                       <div className="flex flex-wrap items-center gap-2">
                         {/* Status Filter */}
                         <select
