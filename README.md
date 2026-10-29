@@ -67,6 +67,8 @@ Enterprise full-stack web application converting the legacy Google Apps Script B
 | **Date Range Filters** | Daily, Weekly, Monthly, Custom | Server-side `calculateDateRange` | Index on `dateTimestamp` | ✅ Fully Implemented |
 | **PDF Download** | `downloadDashboardPDF()` via html2pdf | `exportDashboardToPDF()` | Frontend Client | ✅ Fully Implemented |
 | **Google Sheets Sync** | Direct Sheet calls from browser | Background Worker + Outbox table | `sync_jobs` | ✅ Fully Implemented |
+| **Mobile Responsive Redesign** | Desktop-only rigid layout | Touch-optimized cards, sliding drawers, and fluid modal layouts | Tailwind CSS v3.4 | ✅ Fully Implemented |
+| **Database Constraints** | Unchecked sheet cells | Composite unique constraint on `(department, date)` with migration runner | `head_ratings` | ✅ Fully Implemented |
 
 ---
 
