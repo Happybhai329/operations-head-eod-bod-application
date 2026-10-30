@@ -5,14 +5,14 @@ import { env } from '../config/env';
 
 export class GoogleSheetsClient {
   private static sheetsApi: sheets_v4.Sheets | null = null;
-  private static isInitialized = false;
+  private static lastAuthAttempt = 0;
 
   /**
    * Initializes and returns the authenticated Google Sheets API client.
    */
   public static getClient(): sheets_v4.Sheets | null {
     if (this.sheetsApi) return this.sheetsApi;
-    if (this.isInitialized) return null; // Already tried and failed or disabled
+
 
     try {
       let auth;
@@ -36,10 +36,12 @@ export class GoogleSheetsClient {
       }
 
       // 2. Try discrete email & key env credentials
-      if (!auth && env.GOOGLE_SERVICE_ACCOUNT_EMAIL && env.GOOGLE_PRIVATE_KEY) {
+      const discreteEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+      const discreteKey = process.env.GOOGLE_PRIVATE_KEY || env.GOOGLE_PRIVATE_KEY;
+      if (!auth && discreteEmail && discreteKey) {
         auth = new google.auth.JWT({
-          email: env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-          key: env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          email: discreteEmail,
+          key: discreteKey.replace(/\\n/g, '\n'),
           scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
       }
@@ -70,14 +72,14 @@ export class GoogleSheetsClient {
 
       if (auth) {
         this.sheetsApi = google.sheets({ version: 'v4', auth });
-        this.isInitialized = true;
+
         return this.sheetsApi;
       }
     } catch (err) {
       console.warn('⚠️ Google Sheets authentication could not be established:', err);
     }
 
-    this.isInitialized = true;
+
     return null;
   }
 
